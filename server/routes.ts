@@ -15,22 +15,22 @@ import {
   getAllSeriesIds,
   getMovieUrl,
   getSeriesData,
-} from "./jsonbin";
+} from "./firebase";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
-  // Get hero media (até 4 últimos itens rotacionados dos bins)
+  // Get hero media (até 5 últimos itens rotacionados dos bancos Firebase)
   app.get("/api/media/hero", async (req, res) => {
     try {
-      // Pegar os IDs dos bins - Object.keys() mantém a ordem de inserção
+      // Pegar os IDs dos bancos Firebase - Object.keys() mantém a ordem de inserção
       const [movieIds, seriesIds] = await Promise.all([
         getAllMovieIds(),
         getAllSeriesIds()
       ]);
       
-      // Pegar os últimos IDs (máximo 2 de cada bin para ter até 4 no total)
-      const lastMovieIds = movieIds.slice(-2);
-      const lastSeriesIds = seriesIds.slice(-2);
+      // Pegar os últimos IDs (máximo 3 de cada banco para ter até 5 no total, variando)
+      const lastMovieIds = movieIds.slice(-3);
+      const lastSeriesIds = seriesIds.slice(-3);
       
       const candidates: MediaItem[] = [];
       
@@ -84,8 +84,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Retornar até 4 itens
-      res.json(candidates.slice(0, 4));
+      // Retornar até 5 itens
+      res.json(candidates.slice(0, 5));
     } catch (error) {
       console.error('Error fetching hero media:', error);
       res.status(500).json({ error: 'Failed to fetch hero media' });
