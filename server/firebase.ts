@@ -91,7 +91,10 @@ export async function getSeriesBin(): Promise<SeriesBinData> {
 
 export async function getMovieUrl(tmdbId: number): Promise<string | undefined> {
   const moviesBin = await getMovieBin();
-  return moviesBin[tmdbId.toString()];
+  if (moviesBin?.['catalogo-filmes-tavernastream']?.filmes) {
+    return moviesBin['catalogo-filmes-tavernastream'].filmes[tmdbId.toString()];
+  }
+  return undefined;
 }
 
 export async function getSeriesData(tmdbId: number): Promise<SeriesBinData[string] | undefined> {
@@ -101,10 +104,27 @@ export async function getSeriesData(tmdbId: number): Promise<SeriesBinData[strin
 
 export async function getAllMovieIds(): Promise<number[]> {
   const moviesBin = await getMovieBin();
-  return Object.keys(moviesBin).map(Number);
+  if (!moviesBin || typeof moviesBin !== 'object') {
+    return [];
+  }
+  
+  const filmes = moviesBin['catalogo-filmes-tavernastream']?.filmes;
+  if (!filmes || typeof filmes !== 'object') {
+    return [];
+  }
+  
+  return Object.keys(filmes)
+    .map(Number)
+    .filter(id => !isNaN(id) && id > 0);
 }
 
 export async function getAllSeriesIds(): Promise<number[]> {
   const seriesBin = await getSeriesBin();
-  return Object.keys(seriesBin).map(Number);
+  if (!seriesBin || typeof seriesBin !== 'object') {
+    return [];
+  }
+  
+  return Object.keys(seriesBin)
+    .map(Number)
+    .filter(id => !isNaN(id) && id > 0);
 }

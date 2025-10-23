@@ -57,9 +57,13 @@ export interface TMDBEpisode {
   air_date: string;
 }
 
-// JSONBin Data Structures
+// Firebase Data Structures
 export interface MovieBinData {
-  [tmdbId: string]: string; // tmdbId -> Google Drive embed URL
+  'catalogo-filmes-tavernastream'?: {
+    filmes: {
+      [tmdbId: string]: string; // tmdbId -> Google Drive embed URL
+    };
+  };
 }
 
 export interface SeriesBinData {
