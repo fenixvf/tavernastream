@@ -28,11 +28,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         getAllSeriesIds()
       ]);
       
-      // Pegar os últimos IDs (máximo 3 de cada banco para ter até 5 no total, variando)
+      // Pegar os últimos IDs (3 filmes e 2 séries para balancear melhor)
       const lastMovieIds = movieIds.slice(-3);
-      const lastSeriesIds = seriesIds.slice(-3);
+      const lastSeriesIds = seriesIds.slice(-2);
       
-      const candidates: MediaItem[] = [];
+      const movies: MediaItem[] = [];
+      const series: MediaItem[] = [];
       
       // Buscar detalhes dos últimos filmes
       for (const movieId of lastMovieIds) {
@@ -42,7 +43,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             getMovieExternalIds(movieId).catch(() => ({ imdb_id: undefined })),
             getMovieUrl(movieId)
           ]);
-          candidates.push({
+          movies.push({
             tmdbId: movieId,
             imdbId: externalIds.imdb_id,
             title: details.title || '',
@@ -67,7 +68,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             getTVDetails(seriesId),
             getSeriesData(seriesId)
           ]);
-          candidates.push({
+          series.push({
             tmdbId: seriesId,
             title: details.name || '',
             posterPath: details.poster_path,
@@ -82,6 +83,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } catch (error) {
           console.error(`Error fetching series ${seriesId}:`, error);
         }
+      }
+      
+      // Intercalar filmes e séries para balanceamento: filme, série, filme, série, filme
+      const candidates: MediaItem[] = [];
+      const maxItems = Math.max(movies.length, series.length);
+      for (let i = 0; i < maxItems; i++) {
+        if (movies[i]) candidates.push(movies[i]);
+        if (series[i]) candidates.push(series[i]);
       }
       
       // Retornar até 5 itens

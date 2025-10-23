@@ -69,9 +69,7 @@ export interface MovieBinData {
 export interface SeriesBinData {
   [tmdbId: string]: {
     titulo: string;
-    temporadas: {
-      [seasonNumber: string]: string[]; // Array of episode URLs
-    };
+    temporadas: (string[] | null)[]; // Array indexed by season number (index 0 is null, 1 is season 1, etc.)
   };
 }
 

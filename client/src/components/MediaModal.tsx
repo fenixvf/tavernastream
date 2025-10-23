@@ -145,33 +145,37 @@ export function MediaModal({
           </div>
 
           {/* Episodes (Series Only) */}
-          {mediaType === 'tv' && seriesData && (
+          {mediaType === 'tv' && seriesData && seriesData.temporadas && (
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Episódios</h3>
               <Tabs value={selectedSeason} onValueChange={setSelectedSeason} className="w-full">
                 <TabsList className="w-full justify-start overflow-x-auto flex-nowrap">
-                  {Object.keys(seriesData.temporadas).map((season) => (
-                    <TabsTrigger key={season} value={season} data-testid={`tab-season-${season}`}>
-                      Temporada {season}
-                    </TabsTrigger>
-                  ))}
+                  {seriesData.temporadas.map((_: any, seasonIndex: number) => {
+                    if (seasonIndex === 0 || !seriesData.temporadas[seasonIndex]) return null;
+                    return (
+                      <TabsTrigger key={seasonIndex} value={String(seasonIndex)} data-testid={`tab-season-${seasonIndex}`}>
+                        Temporada {seasonIndex}
+                      </TabsTrigger>
+                    );
+                  }).filter(Boolean)}
                 </TabsList>
-                {Object.entries(seriesData.temporadas).map(([seasonNum, episodes]) => {
+                {seriesData.temporadas.map((episodes: any, seasonIndex: number) => {
+                  if (seasonIndex === 0 || !episodes) return null;
                   const tmdbEpisodes = seasonDetails?.episodes || [];
                   
                   return (
-                    <TabsContent key={seasonNum} value={seasonNum} className="space-y-3 mt-4">
-                      {episodes.map((_, index) => {
+                    <TabsContent key={seasonIndex} value={String(seasonIndex)} className="space-y-3 mt-4">
+                      {episodes.map((_: any, index: number) => {
                         const episodeData = tmdbEpisodes[index];
-                        const progress = getProgress(details.id, 'tv', parseInt(seasonNum), index + 1);
+                        const progress = getProgress(details.id, 'tv', seasonIndex, index + 1);
                         const isWatched = progress?.completed || false;
                         
                         return (
                           <button
                             key={index}
-                            onClick={() => onPlayEpisode?.(parseInt(seasonNum), index + 1)}
+                            onClick={() => onPlayEpisode?.(seasonIndex, index + 1)}
                             className="w-full rounded-lg overflow-hidden bg-secondary hover-elevate active-elevate-2 transition-all group"
-                            data-testid={`button-episode-${seasonNum}-${index + 1}`}
+                            data-testid={`button-episode-${seasonIndex}-${index + 1}`}
                           >
                             <div className="flex gap-4 p-3">
                               {/* Thumbnail */}
