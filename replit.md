@@ -2,11 +2,33 @@
 
 ## Overview
 
-TavernaStream is a full-stack web application designed for streaming movies and series. It integrates data from The Movie Database (TMDB) with video URLs stored in JSONBin, providing a comprehensive streaming experience. The platform features a rich media catalog, a versatile video player, progress tracking, a "New Releases" section, user-specific watchlists, and real-time search capabilities, all presented through a responsive user interface. The project aims to deliver a seamless and engaging streaming service.
+TavernaStream is a full-stack web application designed for streaming movies and series. It integrates data from The Movie Database (TMDB) with video URLs stored in Firebase Realtime Database, providing a comprehensive streaming experience. The platform features a rich media catalog, a versatile video player, progress tracking, a "New Releases" section, user-specific watchlists, and real-time search capabilities, all presented through a responsive user interface. The project aims to deliver a seamless and engaging streaming service.
+
+## Recent Changes (October 2025)
+
+### Firebase Integration Migration
+- **Date**: October 23, 2025
+- **Change**: Migrated from JSONBin to Firebase Realtime Database for unlimited access
+- **Implementation**:
+  - Created `server/firebase.ts` to replace `server/jsonbin.ts`
+  - Uses two separate Firebase databases:
+    - Movies Database: `filmes-series-tavernastream`
+    - Series Database: `series-tavernastream`
+  - Real-time cache invalidation using Firebase `onValue` listeners
+  - 30-second cache TTL for optimal performance
+  - Hero banner updated to show 5 most recent items (instead of 4)
+
+### UI Improvements
+- Enhanced mobile alert visibility in `PlayerOverlay.tsx`:
+  - Increased z-index to 100 for better visibility
+  - Larger, bolder text for better readability
+  - Stronger colors and borders for clear distinction
+  - Fixed positioning at top-20 on mobile, top-24 on desktop
+  - Added shadow-2xl for depth
 
 ## User Preferences
 
-I prefer detailed explanations and an iterative development approach. Please ask before making major changes. Do not make changes to the folder `Z` or the file `Y`.
+I prefer detailed explanations and an iterative development approach. Please ask before making major changes.
 
 ## System Architecture
 
@@ -25,30 +47,69 @@ The application is built with a clear separation between frontend and backend.
 - **External API Integration**: Primarily TMDB API for media metadata.
 - **Data Storage**:
     - PostgreSQL (Neon) for user-specific data like "My List."
-    - JSONBin for storing video URLs, utilizing an intelligent caching system with TTL (30 seconds), ETag support, and stale-if-error strategy for high availability and performance.
+    - **Firebase Realtime Database** for storing video URLs with real-time updates:
+      - Movies: Structured as `catalogo-filmes-tavernastream/filmes/{TMDB_ID}` -> Drive URL
+      - Series: Structured as `{TMDB_ID}/temporadas/{season_number}` -> Array of episode URLs
+      - Intelligent caching system with 30-second TTL
+      - Real-time cache invalidation on database updates
+      - No access limits unlike JSONBin
     - In-memory storage for development purposes.
 
 ### Core Features
 - **Media Catalog**: Displays movies and series, categorized by genre, with automatic updates and TMDB metadata.
 - **Video Player**: Supports two options: PlayerFlix (with ads, using IMDB ID for movies and TMDB ID for series) and direct Google Drive URLs (ad-free). Includes responsive design, episode navigation, and player switching.
 - **Continue Watching**: Tracks viewing progress (PlayerFlix only), stores history in localStorage, and allows users to resume playback.
-- **New Releases**: Highlights recently added content from JSONBin, updated automatically.
+- **New Releases**: Highlights recently added content from Firebase, updated automatically in real-time.
 - **My List**: Allows users to add/remove media, persisted in PostgreSQL.
-- **Search**: Real-time search integrated with TMDB Search API, filtered by availability in JSONBin.
+- **Search**: Real-time search integrated with TMDB Search API, filtered by availability in Firebase.
 - **Responsiveness**: Fully adaptive interface for various devices, including episode thumbnails from TMDB.
 
 ### System Design Choices
-- **JSONBin Caching**: Implements a robust caching mechanism for JSONBin data to optimize requests, ensure data freshness, and provide fault tolerance.
+- **Firebase Real-time Updates**: Implements automatic cache invalidation when database content changes, ensuring users always see the latest content without manual refresh.
 - **Shared State Architecture**: `useWatchProgress` hook is elevated to parent components (Home, MyListPage) to ensure progress state is consistently shared and updated across all `MediaCard` instances, improving data consistency and reducing redundant fetches.
-- **Dynamic Content Ordering**: Catalog display prioritizes recently added items by inverting the order within each JSONBin.
-- **Rotating Hero Banner**: Displays up to four recent items (movies and series) with automatic rotation, manual navigation, and smooth transitions.
+- **Dynamic Content Ordering**: Catalog display prioritizes recently added items by inverting the order within each Firebase database.
+- **Rotating Hero Banner**: Displays up to five recent items (movies and series) with automatic rotation, manual navigation, and smooth transitions.
 
 ## External Dependencies
 
 - **TMDB API**: Used for fetching comprehensive movie and series metadata, including titles, synopses, posters, external IDs (like IMDB), and search capabilities.
-- **JSONBin**: Serves as the primary storage for actual video URLs for both movies and series.
+- **Firebase Realtime Database**: Serves as the primary storage for actual video URLs for both movies and series, with real-time synchronization capabilities.
 - **PlayerFlix API**:
     - Movie Playback: `https://playerflixapi.com/filme/{imdb_id}`
     - Series Playback: `https://playerflixapi.com/serie/{tmdb_id}/{season}/{episode}`
 - **PostgreSQL (Neon)**: Utilized for persistent storage of user-specific data, specifically the "My List" feature.
 - **Google Drive**: Supports direct Google Drive URLs for ad-free video playback.
+
+## Environment Variables
+
+All sensitive credentials are stored securely in Replit Secrets:
+
+### Firebase Movies Database
+- FIREBASE_MOVIES_API_KEY
+- FIREBASE_MOVIES_AUTH_DOMAIN
+- FIREBASE_MOVIES_DATABASE_URL
+- FIREBASE_MOVIES_PROJECT_ID
+- FIREBASE_MOVIES_STORAGE_BUCKET
+- FIREBASE_MOVIES_MESSAGING_SENDER_ID
+- FIREBASE_MOVIES_APP_ID
+- FIREBASE_MOVIES_MEASUREMENT_ID
+
+### Firebase Series Database
+- FIREBASE_SERIES_API_KEY
+- FIREBASE_SERIES_AUTH_DOMAIN
+- FIREBASE_SERIES_DATABASE_URL
+- FIREBASE_SERIES_PROJECT_ID
+- FIREBASE_SERIES_STORAGE_BUCKET
+- FIREBASE_SERIES_MESSAGING_SENDER_ID
+- FIREBASE_SERIES_APP_ID
+- FIREBASE_SERIES_MEASUREMENT_ID
+
+### TMDB API
+- TMDB_API_KEY
+
+## Deployment
+
+The application is configured for Replit deployment with autoscale:
+- Build: `npm run build`
+- Start: `npm start`
+- Development: `npm run dev` (port 5000)
