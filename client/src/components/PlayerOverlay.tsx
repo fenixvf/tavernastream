@@ -135,20 +135,20 @@ export function PlayerOverlay({
           Reproduzir {episodeTitle}
         </DialogDescription>
         
-        {/* Alerts */}
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-md px-4">
+        {/* Alerts - Melhorado para mobile */}
+        <div className="fixed top-20 sm:top-24 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-md px-2">
           {showAdWarning && (
-            <Alert className="bg-yellow-500/90 text-black border-0 backdrop-blur-sm animate-in fade-in slide-in-from-top-2">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription className="font-semibold">
+            <Alert className="bg-yellow-500/95 text-black border-2 border-yellow-600 shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-top-4 duration-300">
+              <AlertTriangle className="h-5 w-5" />
+              <AlertDescription className="font-bold text-base sm:text-lg">
                 Este player contém anúncios
               </AlertDescription>
             </Alert>
           )}
           {showOverloadWarning && (
-            <Alert className="bg-destructive/90 text-destructive-foreground border-0 backdrop-blur-sm animate-in fade-in slide-in-from-top-2">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription className="font-semibold">
+            <Alert className="bg-red-600/95 text-white border-2 border-red-700 shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-top-4 duration-300">
+              <AlertTriangle className="h-5 w-5" />
+              <AlertDescription className="font-bold text-base sm:text-lg">
                 O player está sobrecarregado. Volte mais tarde.
               </AlertDescription>
             </Alert>
