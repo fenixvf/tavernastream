@@ -248,6 +248,10 @@ export default function MyListPage() {
         onTabChange={(tab) => {
           if (tab === 'home') {
             setLocation('/');
+          } else if (tab === 'search') {
+            setIsSearchOpen(true);
+          } else if (tab === 'browse') {
+            setLocation('/');
           }
         }}
       />

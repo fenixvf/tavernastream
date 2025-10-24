@@ -196,7 +196,7 @@ export function PlayerOverlay({
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* PlayerFlix Option */}
+                {/* PlayerFlix Option - Sempre disponível */}
                 <button
                   onClick={() => handlePlayerSelect('playerflix')}
                   className="p-6 rounded-lg bg-card border-2 border-card-border hover:border-primary transition-all hover-elevate active-elevate-2 group"
@@ -214,23 +214,24 @@ export function PlayerOverlay({
                   </div>
                 </button>
 
-                {/* Google Drive Option */}
-                <button
-                  onClick={() => handlePlayerSelect('drive')}
-                  disabled={!driveUrl}
-                  className="p-6 rounded-lg bg-card border-2 border-card-border hover:border-primary transition-all hover-elevate active-elevate-2 group disabled:opacity-50 disabled:cursor-not-allowed"
-                  data-testid="button-player-option-2"
-                >
-                  <div className="space-y-2">
-                    <h3 className="text-xl font-bold group-hover:text-primary transition-colors">
-                      Opção 2
-                    </h3>
-                    <p className="text-sm text-muted-foreground">Sem Anúncios</p>
-                    <div className="flex items-center justify-center gap-2 text-green-500">
-                      <span className="text-xs">Google Drive</span>
+                {/* Google Drive Option - Apenas se disponível */}
+                {driveUrl && (
+                  <button
+                    onClick={() => handlePlayerSelect('drive')}
+                    className="p-6 rounded-lg bg-card border-2 border-card-border hover:border-primary transition-all hover-elevate active-elevate-2 group"
+                    data-testid="button-player-option-2"
+                  >
+                    <div className="space-y-2">
+                      <h3 className="text-xl font-bold group-hover:text-primary transition-colors">
+                        Opção 2
+                      </h3>
+                      <p className="text-sm text-muted-foreground">Sem Anúncios</p>
+                      <div className="flex items-center justify-center gap-2 text-green-500">
+                        <span className="text-xs">Google Drive</span>
+                      </div>
                     </div>
-                  </div>
-                </button>
+                  </button>
+                )}
               </div>
             </div>
           ) : (
