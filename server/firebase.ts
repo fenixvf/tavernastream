@@ -92,7 +92,11 @@ export async function getSeriesBin(): Promise<SeriesBinData> {
 export async function getMovieUrl(tmdbId: number): Promise<string | undefined> {
   const moviesBin = await getMovieBin();
   if (moviesBin?.['catalogo-filmes-tavernastream']?.filmes) {
-    return moviesBin['catalogo-filmes-tavernastream'].filmes[tmdbId.toString()];
+    const value = moviesBin['catalogo-filmes-tavernastream'].filmes[tmdbId.toString()];
+    // Retorna apenas se for uma string válida (URL do Drive)
+    if (typeof value === 'string' && value.length > 0) {
+      return value;
+    }
   }
   return undefined;
 }

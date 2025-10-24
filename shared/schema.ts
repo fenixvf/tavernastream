@@ -61,7 +61,7 @@ export interface TMDBEpisode {
 export interface MovieBinData {
   'catalogo-filmes-tavernastream'?: {
     filmes: {
-      [tmdbId: string]: string; // tmdbId -> Google Drive embed URL
+      [tmdbId: string]: string | null | true; // tmdbId -> Google Drive URL, null, ou true (apenas ID)
     };
   };
 }

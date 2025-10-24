@@ -214,24 +214,33 @@ export function PlayerOverlay({
                   </div>
                 </button>
 
-                {/* Google Drive Option - Apenas se disponível */}
-                {driveUrl && (
-                  <button
-                    onClick={() => handlePlayerSelect('drive')}
-                    className="p-6 rounded-lg bg-card border-2 border-card-border hover:border-primary transition-all hover-elevate active-elevate-2 group"
-                    data-testid="button-player-option-2"
-                  >
-                    <div className="space-y-2">
-                      <h3 className="text-xl font-bold group-hover:text-primary transition-colors">
-                        Opção 2
-                      </h3>
-                      <p className="text-sm text-muted-foreground">Sem Anúncios</p>
-                      <div className="flex items-center justify-center gap-2 text-green-500">
-                        <span className="text-xs">Google Drive</span>
-                      </div>
+                {/* Google Drive Option - Sempre visível, mas desabilitada se não houver URL */}
+                <button
+                  onClick={() => driveUrl && handlePlayerSelect('drive')}
+                  disabled={!driveUrl}
+                  className={`p-6 rounded-lg bg-card border-2 transition-all ${
+                    driveUrl 
+                      ? 'border-card-border hover:border-primary hover-elevate active-elevate-2 cursor-pointer' 
+                      : 'border-card-border/30 cursor-not-allowed opacity-50'
+                  } group`}
+                  data-testid="button-player-option-2"
+                >
+                  <div className="space-y-2">
+                    <h3 className={`text-xl font-bold transition-colors ${
+                      driveUrl ? 'group-hover:text-primary' : 'text-muted-foreground'
+                    }`}>
+                      Opção 2
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      {driveUrl ? 'Sem Anúncios' : 'Indisponível'}
+                    </p>
+                    <div className={`flex items-center justify-center gap-2 ${
+                      driveUrl ? 'text-green-500' : 'text-muted-foreground/50'
+                    }`}>
+                      <span className="text-xs">Google Drive</span>
                     </div>
-                  </button>
-                )}
+                  </div>
+                </button>
               </div>
             </div>
           ) : (
