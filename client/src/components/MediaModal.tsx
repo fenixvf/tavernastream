@@ -36,7 +36,7 @@ export function MediaModal({
 
   const { data: seasonDetails } = useQuery<{ episodes: TMDBEpisode[] }>({
     queryKey: ['/api/media/tv', details?.id, 'season', selectedSeason],
-    enabled: mediaType === 'tv' && isOpen && !!seriesData && !!details,
+    enabled: mediaType === 'tv' && isOpen && !!details,
   });
 
   const backdropUrl = details?.backdrop_path
@@ -145,37 +145,40 @@ export function MediaModal({
           </div>
 
           {/* Episodes (Series Only) */}
-          {mediaType === 'tv' && seriesData && seriesData.temporadas && (
+          {mediaType === 'tv' && details?.seasons && details.seasons.length > 0 && (
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Episódios</h3>
               <Tabs value={selectedSeason} onValueChange={setSelectedSeason} className="w-full">
                 <TabsList className="w-full justify-start overflow-x-auto flex-nowrap">
-                  {seriesData.temporadas.map((_: any, seasonIndex: number) => {
-                    if (seasonIndex === 0 || !seriesData.temporadas[seasonIndex]) return null;
+                  {details.seasons.map((season) => {
+                    if (season.season_number === 0) return null;
                     return (
-                      <TabsTrigger key={seasonIndex} value={String(seasonIndex)} data-testid={`tab-season-${seasonIndex}`}>
-                        Temporada {seasonIndex}
+                      <TabsTrigger key={season.season_number} value={String(season.season_number)} data-testid={`tab-season-${season.season_number}`}>
+                        Temporada {season.season_number}
                       </TabsTrigger>
                     );
-                  }).filter(Boolean)}
+                  })}
                 </TabsList>
-                {seriesData.temporadas.map((episodes: any, seasonIndex: number) => {
-                  if (seasonIndex === 0 || !episodes) return null;
+                {details.seasons.map((season) => {
+                  if (season.season_number === 0) return null;
+                  const seasonNumber = season.season_number;
                   const tmdbEpisodes = seasonDetails?.episodes || [];
+                  const firebaseEpisodes = seriesData?.temporadas?.[seasonNumber];
                   
                   return (
-                    <TabsContent key={seasonIndex} value={String(seasonIndex)} className="space-y-3 mt-4">
-                      {episodes.map((_: any, index: number) => {
-                        const episodeData = tmdbEpisodes[index];
-                        const progress = getProgress(details.id, 'tv', seasonIndex, index + 1);
+                    <TabsContent key={seasonNumber} value={String(seasonNumber)} className="space-y-3 mt-4">
+                      {(tmdbEpisodes.length > 0 ? tmdbEpisodes : Array.from({ length: season.episode_count }, (_, i) => ({ episode_number: i + 1 }))).map((episodeData: any, index: number) => {
+                        const episodeNumber = episodeData.episode_number || index + 1;
+                        const progress = getProgress(details.id, 'tv', seasonNumber, episodeNumber);
                         const isWatched = progress?.completed || false;
+                        const hasDriveUrl = firebaseEpisodes && firebaseEpisodes[episodeNumber - 1];
                         
                         return (
                           <button
-                            key={index}
-                            onClick={() => onPlayEpisode?.(seasonIndex, index + 1)}
+                            key={episodeNumber}
+                            onClick={() => onPlayEpisode?.(seasonNumber, episodeNumber)}
                             className="w-full rounded-lg overflow-hidden bg-secondary hover-elevate active-elevate-2 transition-all group"
-                            data-testid={`button-episode-${seasonIndex}-${index + 1}`}
+                            data-testid={`button-episode-${seasonNumber}-${episodeNumber}`}
                           >
                             <div className="flex gap-4 p-3">
                               {/* Thumbnail */}
@@ -188,7 +191,7 @@ export function MediaModal({
                                   />
                                 ) : (
                                   <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-muted-foreground">
-                                    {index + 1}
+                                    {episodeNumber}
                                   </div>
                                 )}
                                 {isWatched && (
@@ -217,15 +220,20 @@ export function MediaModal({
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 mb-1">
                                       <span className="text-sm font-semibold text-muted-foreground">
-                                        {index + 1}
+                                        {episodeNumber}
                                       </span>
                                       <h4 className="font-semibold truncate">
-                                        {episodeData?.name || `Episódio ${index + 1}`}
+                                        {episodeData?.name || `Episódio ${episodeNumber}`}
                                       </h4>
                                     </div>
                                     {episodeData?.overview && (
                                       <p className="text-sm text-muted-foreground line-clamp-2">
                                         {episodeData.overview}
+                                      </p>
+                                    )}
+                                    {!hasDriveUrl && (
+                                      <p className="text-xs text-muted-foreground/70 mt-1">
+                                        PlayerFlix disponível
                                       </p>
                                     )}
                                   </div>
