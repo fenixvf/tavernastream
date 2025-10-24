@@ -18,13 +18,17 @@ TavernaStream is a full-stack web application designed for streaming movies and 
   - 30-second cache TTL for optimal performance
   - Hero banner updated to show 5 most recent items (instead of 4)
 
-### UI Improvements
-- Enhanced mobile alert visibility in `PlayerOverlay.tsx`:
-  - Increased z-index to 100 for better visibility
-  - Larger, bolder text for better readability
-  - Stronger colors and borders for clear distinction
-  - Fixed positioning at top-20 on mobile, top-24 on desktop
-  - Added shadow-2xl for depth
+### UI & UX Improvements (October 24, 2025)
+- **PlayerOverlay Enhancement**: PlayerFlix is now always shown as Option 1, even when Google Drive URLs are unavailable
+- **Mobile Navigation Fix**: My List page now correctly handles search and browse button clicks
+- **Mobile Search Improvement**: Added dedicated input field in SearchOverlay with autofocus for better mobile experience
+- **Continue Watching Details**: Now displays episode information (T1:E2 - Episode Name) or movie timestamps where playback stopped
+- **Novidades Section Fix**: Maintains stable database order showing first 10 items without reversing
+- **Hero Banner Update**: Displays the most recent additions from Firebase (3 movies + 2 series)
+- **Release Countdown System**: Implemented configurable countdown timer with expandable popup
+  - Configuration file: `client/src/lib/releaseConfig.ts`
+  - Features: Expandable popup, countdown display, release notifications
+  - Setup guide: `COUNTDOWN_SETUP.md`
 
 ## User Preferences
 
