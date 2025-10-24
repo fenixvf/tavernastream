@@ -23,12 +23,17 @@ TavernaStream is a full-stack web application designed for streaming movies and 
 - **Mobile Navigation Fix**: My List page now correctly handles search and browse button clicks
 - **Mobile Search Improvement**: Added dedicated input field in SearchOverlay with autofocus for better mobile experience
 - **Continue Watching Details**: Now displays episode information (T1:E2 - Episode Name) or movie timestamps where playback stopped
-- **Novidades Section Fix**: Maintains stable database order showing first 10 items without reversing
+- **Content Ordering**: Firebase IDs are now reversed to show most recent content first (via `.reverse()` on getAllMovieIds and getAllSeriesIds)
+- **Watch Button Always Available**: Movie "Assistir" button now appears regardless of Drive URL availability (always offers PlayerFlix option)
+- **Novidades Section Balance**: Shows balanced mix of 5 recent movies and 5 recent series, intercalated for variety
 - **Hero Banner Update**: Displays the most recent additions from Firebase (3 movies + 2 series)
-- **Release Countdown System**: Implemented configurable countdown timer with expandable popup
-  - Configuration file: `client/src/lib/releaseConfig.ts`
-  - Features: Expandable popup, countdown display, release notifications
-  - Setup guide: `COUNTDOWN_SETUP.md`
+- **Release Countdown Enhancement**: Improved visual design with:
+  - Gradient backgrounds with blur effects
+  - Animated pulse indicator on clock icon
+  - Better responsive sizing for desktop (w-96) and mobile
+  - Enhanced expanded view with larger countdown display
+  - Added seconds counter in the detailed breakdown
+  - Improved border styles and shadows for premium feel
 
 ## User Preferences
 

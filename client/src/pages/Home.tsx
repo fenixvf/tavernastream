@@ -87,8 +87,24 @@ export default function Home() {
     })
     .filter(Boolean) as MediaItem[];
 
-  // Get new releases (first 10 items mantém a ordem do database)
-  const newReleases = allMedia?.slice(0, 10) || [];
+  // Get new releases - balanceado entre filmes e séries (5 de cada)
+  const newReleases = (() => {
+    if (!allMedia) return [];
+    
+    const recentMovies = allMedia.filter(m => m.mediaType === 'movie').slice(0, 5);
+    const recentSeries = allMedia.filter(m => m.mediaType === 'tv').slice(0, 5);
+    
+    // Intercalar filmes e séries
+    const balanced: MediaItem[] = [];
+    const maxLength = Math.max(recentMovies.length, recentSeries.length);
+    
+    for (let i = 0; i < maxLength; i++) {
+      if (recentMovies[i]) balanced.push(recentMovies[i]);
+      if (recentSeries[i]) balanced.push(recentSeries[i]);
+    }
+    
+    return balanced;
+  })();
 
   // Categorize media by genre
   const categorizeMedia = () => {
