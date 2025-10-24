@@ -205,25 +205,29 @@ export default function Home() {
   };
 
   const handlePlayEpisode = async (seasonNumber: number, episodeNumber: number) => {
-    if (!selectedMedia || !seriesData) return;
+    if (!selectedMedia) return;
     
     const seasonKey = seasonNumber.toString();
-    const seasonEpisodes = seriesData.temporadas[seasonKey as keyof typeof seriesData.temporadas] as string[] | undefined;
+    const seasonEpisodes = seriesData?.temporadas?.[seasonKey as keyof typeof seriesData.temporadas] as string[] | undefined;
     const driveUrl = seasonEpisodes?.[episodeNumber - 1];
-    const totalEpisodes = seasonEpisodes?.length || 1;
     
     let episodeName = `Episódio ${episodeNumber}`;
+    let totalEpisodes = seasonEpisodes?.length || 1;
+    
     try {
       const response = await fetch(`/api/media/tv/${selectedMedia.tmdbId}/season/${seasonNumber}`);
       if (response.ok) {
         const data: { episodes: TMDBEpisode[] } = await response.json();
+        if (data.episodes && data.episodes.length > 0) {
+          totalEpisodes = data.episodes.length;
+        }
         const episode = data.episodes?.[episodeNumber - 1];
         if (episode) {
           episodeName = episode.name;
         }
       }
     } catch (error) {
-      console.error('Error fetching episode name:', error);
+      console.error('Error fetching episode data:', error);
     }
     
     setPlayerConfig({
@@ -243,25 +247,29 @@ export default function Home() {
   };
 
   const handleEpisodeChange = async (newEpisodeNumber: number) => {
-    if (!playerConfig || !playerConfig.seasonNumber || !seriesData) return;
+    if (!playerConfig || !playerConfig.seasonNumber) return;
     
     const seasonKey = playerConfig.seasonNumber.toString();
-    const seasonEpisodes = seriesData.temporadas[seasonKey as keyof typeof seriesData.temporadas] as string[] | undefined;
+    const seasonEpisodes = seriesData?.temporadas?.[seasonKey as keyof typeof seriesData.temporadas] as string[] | undefined;
     const driveUrl = seasonEpisodes?.[newEpisodeNumber - 1];
-    const totalEpisodes = seasonEpisodes?.length || 1;
     
     let episodeName = `Episódio ${newEpisodeNumber}`;
+    let totalEpisodes = seasonEpisodes?.length || playerConfig.totalEpisodes || 1;
+    
     try {
       const response = await fetch(`/api/media/tv/${playerConfig.tmdbId}/season/${playerConfig.seasonNumber}`);
       if (response.ok) {
         const data: { episodes: TMDBEpisode[] } = await response.json();
+        if (data.episodes && data.episodes.length > 0) {
+          totalEpisodes = data.episodes.length;
+        }
         const episode = data.episodes?.[newEpisodeNumber - 1];
         if (episode) {
           episodeName = episode.name;
         }
       }
     } catch (error) {
-      console.error('Error fetching episode name:', error);
+      console.error('Error fetching episode data:', error);
     }
     
     setPlayerConfig({
