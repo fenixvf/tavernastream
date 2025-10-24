@@ -104,19 +104,25 @@ export async function getSeriesData(tmdbId: number): Promise<SeriesBinData[strin
 
 export async function getAllMovieIds(): Promise<number[]> {
   const moviesBin = await getMovieBin();
+  console.log('Movies Bin Data:', JSON.stringify(moviesBin).substring(0, 200));
   if (!moviesBin || typeof moviesBin !== 'object') {
+    console.log('No movies bin data found');
     return [];
   }
   
   const filmes = moviesBin['catalogo-filmes-tavernastream']?.filmes;
+  console.log('Filmes data exists:', !!filmes);
   if (!filmes || typeof filmes !== 'object') {
+    console.log('No filmes found in bin');
     return [];
   }
   
-  return Object.keys(filmes)
+  const ids = Object.keys(filmes)
     .map(Number)
     .filter(id => !isNaN(id) && id > 0)
     .reverse();
+  console.log(`Found ${ids.length} movie IDs`);
+  return ids;
 }
 
 export async function getAllSeriesIds(): Promise<number[]> {
