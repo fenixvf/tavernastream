@@ -11,9 +11,11 @@ interface CategoryRowProps {
   onAddToList: (media: MediaItem) => void;
   myListIds: number[];
   allProgress?: WatchProgress[];
+  onContinueWatching?: (media: MediaItem) => void; // Callback especial para "Continuar Assistindo"
 }
 
-export function CategoryRow({ title, media, onMediaClick, onAddToList, myListIds, allProgress }: CategoryRowProps) {
+export function CategoryRow({ title, media, onMediaClick, onAddToList, myListIds, allProgress, onContinueWatching }: CategoryRowProps) {
+  const isContinueWatching = title === 'Continuar Assistindo';
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: 'left' | 'right') => {
@@ -58,7 +60,7 @@ export function CategoryRow({ title, media, onMediaClick, onAddToList, myListIds
             <div key={item.tmdbId} className="flex-none w-[140px] md:w-[200px] snap-start">
               <MediaCard
                 media={item}
-                onClick={() => onMediaClick(item)}
+                onClick={() => isContinueWatching && onContinueWatching ? onContinueWatching(item) : onMediaClick(item)}
                 onAddToList={() => onAddToList(item)}
                 isInList={myListIds.includes(item.tmdbId)}
                 allProgress={allProgress}

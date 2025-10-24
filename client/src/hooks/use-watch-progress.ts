@@ -32,8 +32,12 @@ export function useWatchProgress() {
         }
       });
 
+      // Marcar como completo se progress >= 90%
+      const isCompleted = progress.progress >= 90 || progress.completed;
+
       const newProgress: WatchProgress = {
         ...progress,
+        completed: isCompleted,
         lastWatchedAt: new Date().toISOString(),
       };
 
@@ -45,6 +49,15 @@ export function useWatchProgress() {
       } else {
         updated = [newProgress, ...prev];
       }
+
+      // Filtrar itens completados da lista de "Continuar Assistindo" após 7 dias
+      const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+      updated = updated.filter((p) => {
+        if (p.completed) {
+          return new Date(p.lastWatchedAt).getTime() > sevenDaysAgo;
+        }
+        return true;
+      });
 
       updated.sort((a, b) => 
         new Date(b.lastWatchedAt).getTime() - new Date(a.lastWatchedAt).getTime()

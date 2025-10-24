@@ -21,6 +21,8 @@ interface PlayerOverlayProps {
   driveUrl?: string;
   totalEpisodes?: number;
   onEpisodeChange?: (episodeNumber: number) => void;
+  autoPlayPlayerFlix?: boolean; // Auto-selecionar Player 1 (para continuar assistindo)
+  resumeTime?: number; // Tempo em segundos para começar
 }
 
 export function PlayerOverlay({
@@ -38,6 +40,8 @@ export function PlayerOverlay({
   driveUrl,
   totalEpisodes = 1,
   onEpisodeChange,
+  autoPlayPlayerFlix = false,
+  resumeTime,
 }: PlayerOverlayProps) {
   const [selectedPlayer, setSelectedPlayer] = useState<PlayerType | null>(null);
   const [showAdWarning, setShowAdWarning] = useState(false);
@@ -45,13 +49,25 @@ export function PlayerOverlay({
   const [watchStartTime, setWatchStartTime] = useState<number | null>(null);
   const { saveProgress } = useWatchProgress();
 
+  // Auto-selecionar PlayerFlix quando autoPlayPlayerFlix é true
+  useEffect(() => {
+    if (isOpen && autoPlayPlayerFlix && !selectedPlayer) {
+      handlePlayerSelect('playerflix');
+    }
+  }, [isOpen, autoPlayPlayerFlix]);
+
   const saveCurrentProgress = useCallback(() => {
     if (watchStartTime && selectedPlayer === 'playerflix') {
       const watchDuration = Date.now() - watchStartTime;
       const watchedMinutes = watchDuration / 60000;
+      const watchedSeconds = watchDuration / 1000;
       
-      if (watchedMinutes >= 2) {
-        const isCompleted = watchedMinutes >= 15 || (mediaType === 'tv' && watchedMinutes >= 10);
+      // Salvar progresso se assistiu pelo menos 30 segundos
+      if (watchedSeconds >= 30) {
+        // Estimar duração total baseado no tipo de mídia
+        const estimatedDuration = mediaType === 'movie' ? 7200 : 2400; // 2h para filmes, 40min para episódios
+        const progressPercent = Math.min(95, (watchedSeconds / estimatedDuration) * 100);
+        const isCompleted = progressPercent >= 90;
         
         saveProgress({
           tmdbId,
@@ -59,8 +75,10 @@ export function PlayerOverlay({
           title,
           posterPath: posterPath || null,
           backdropPath: backdropPath || null,
-          progress: isCompleted ? 100 : Math.min(95, (watchedMinutes / 20) * 100),
-          duration: watchDuration,
+          progress: isCompleted ? 100 : progressPercent,
+          currentTime: Math.floor(watchedSeconds), // Tempo assistido em segundos
+          totalDuration: estimatedDuration, // Duração estimada em segundos
+          duration: watchDuration, // Duração da sessão em ms (compatibilidade)
           seasonNumber,
           episodeNumber,
           episodeName,
@@ -92,13 +110,21 @@ export function PlayerOverlay({
   };
 
   const getPlayerFlixUrl = () => {
+    let baseUrl = '';
     if (mediaType === 'movie') {
       const movieId = imdbId || tmdbId;
-      return `https://playerflixapi.com/filme/${movieId}`;
+      baseUrl = `https://playerflixapi.com/filme/${movieId}`;
     } else if (seasonNumber && episodeNumber) {
-      return `https://playerflixapi.com/serie/${tmdbId}/${seasonNumber}/${episodeNumber}`;
+      baseUrl = `https://playerflixapi.com/serie/${tmdbId}/${seasonNumber}/${episodeNumber}`;
     }
-    return '';
+    
+    // Adicionar tempo de retomada se fornecido (PlayerFlix pode ter seu próprio sistema)
+    if (baseUrl && resumeTime && resumeTime > 10) {
+      // Tentar com query parameter e hash (depende da API do PlayerFlix)
+      baseUrl += `?t=${Math.floor(resumeTime)}#t=${Math.floor(resumeTime)}`;
+    }
+    
+    return baseUrl;
   };
 
   const episodeTitle = seasonNumber && episodeNumber

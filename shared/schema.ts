@@ -128,8 +128,10 @@ export interface WatchProgress {
   posterPath: string | null;
   backdropPath: string | null;
   lastWatchedAt: string;
-  progress: number;
-  duration?: number;
+  progress: number; // Percentual 0-100
+  currentTime?: number; // Tempo atual em segundos
+  totalDuration?: number; // Duração total em segundos
+  duration?: number; // Duração da sessão de visualização em ms (antigo, manter compatibilidade)
   seasonNumber?: number;
   episodeNumber?: number;
   episodeName?: string;

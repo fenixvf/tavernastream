@@ -37,9 +37,11 @@ export default function Home() {
     backdropPath?: string | null;
     driveUrl?: string;
     totalEpisodes?: number;
+    autoPlayPlayerFlix?: boolean;
+    resumeTime?: number;
   } | null>(null);
 
-  const { getContinueWatching, watchProgress } = useWatchProgress();
+  const { getContinueWatching, watchProgress, getProgress } = useWatchProgress();
 
   // Fetch all media (movies + series) - atualiza a cada 30 segundos
   const { data: allMedia, isLoading: isLoadingMedia } = useQuery<MediaItem[]>({
@@ -156,6 +158,49 @@ export default function Home() {
     setIsModalOpen(true);
   };
 
+  const handleContinueWatching = async (media: MediaItem) => {
+    const progress = watchProgress.find((p) => {
+      if (media.mediaType === 'movie') {
+        return p.tmdbId === media.tmdbId && p.mediaType === 'movie';
+      } else {
+        return p.tmdbId === media.tmdbId && p.mediaType === 'tv';
+      }
+    });
+
+    if (!progress) {
+      handleMediaClick(media);
+      return;
+    }
+
+    setSelectedMedia(media);
+
+    if (media.mediaType === 'movie') {
+      await handlePlayMovie(media, true);
+    } else if (progress.seasonNumber && progress.episodeNumber) {
+      // Buscar dados da série para abrir o episódio correto
+      try {
+        const response = await fetch(`/api/media/series/${media.tmdbId}`);
+        if (response.ok) {
+          const data = await response.json();
+          // Temporariamente definir seriesData
+          const tempSeriesData = data;
+          setSelectedMedia(media);
+          
+          // Esperar um pouco para garantir que o estado foi atualizado
+          setTimeout(() => {
+            handlePlayEpisode(progress.seasonNumber!, progress.episodeNumber!, true);
+          }, 100);
+        } else {
+          // Se não tiver dados da série, abre direto o player
+          handlePlayEpisode(progress.seasonNumber, progress.episodeNumber, true);
+        }
+      } catch (error) {
+        console.error('Error fetching series data:', error);
+        handlePlayEpisode(progress.seasonNumber, progress.episodeNumber, true);
+      }
+    }
+  };
+
   const handleAddToList = async (media: MediaItem) => {
     try {
       const isInList = myListIds.includes(media.tmdbId);
@@ -177,7 +222,7 @@ export default function Home() {
     }
   };
 
-  const handlePlayMovie = async (media?: MediaItem) => {
+  const handlePlayMovie = async (media?: MediaItem, continueWatching?: boolean) => {
     const mediaToPlay = media || selectedMedia;
     if (!mediaToPlay) return;
     
@@ -192,6 +237,15 @@ export default function Home() {
       console.error('Error fetching movie URL:', error);
     }
     
+    // Buscar progresso se for "continuar assistindo"
+    let resumeTime: number | undefined;
+    if (continueWatching) {
+      const progress = getProgress(mediaToPlay.tmdbId, 'movie');
+      if (progress && progress.currentTime) {
+        resumeTime = progress.currentTime;
+      }
+    }
+    
     setPlayerConfig({
       tmdbId: mediaToPlay.tmdbId,
       imdbId: mediaToPlay.imdbId,
@@ -200,11 +254,13 @@ export default function Home() {
       posterPath: mediaToPlay.posterPath,
       backdropPath: mediaToPlay.backdropPath,
       driveUrl,
+      autoPlayPlayerFlix: continueWatching,
+      resumeTime,
     });
     setIsPlayerOpen(true);
   };
 
-  const handlePlayEpisode = async (seasonNumber: number, episodeNumber: number) => {
+  const handlePlayEpisode = async (seasonNumber: number, episodeNumber: number, continueWatching?: boolean) => {
     if (!selectedMedia) return;
     
     const seasonKey = seasonNumber.toString();
@@ -230,6 +286,15 @@ export default function Home() {
       console.error('Error fetching episode data:', error);
     }
     
+    // Buscar progresso se for "continuar assistindo"
+    let resumeTime: number | undefined;
+    if (continueWatching) {
+      const progress = getProgress(selectedMedia.tmdbId, 'tv', seasonNumber, episodeNumber);
+      if (progress && progress.currentTime) {
+        resumeTime = progress.currentTime;
+      }
+    }
+    
     setPlayerConfig({
       tmdbId: selectedMedia.tmdbId,
       imdbId: selectedMedia.imdbId,
@@ -242,6 +307,8 @@ export default function Home() {
       backdropPath: selectedMedia.backdropPath,
       driveUrl,
       totalEpisodes,
+      autoPlayPlayerFlix: continueWatching,
+      resumeTime,
     });
     setIsPlayerOpen(true);
   };
@@ -355,6 +422,7 @@ export default function Home() {
               onAddToList={handleAddToList}
               myListIds={myListIds}
               allProgress={watchProgress}
+              onContinueWatching={handleContinueWatching}
             />
           )}
 
@@ -393,7 +461,7 @@ export default function Home() {
         details={mediaDetails || null}
         seriesData={seriesData}
         mediaType={selectedMedia?.mediaType || 'movie'}
-        onPlayMovie={handlePlayMovie}
+        onPlayMovie={() => handlePlayMovie()}
         onPlayEpisode={handlePlayEpisode}
         onAddToList={() => selectedMedia && handleAddToList(selectedMedia)}
         isInList={selectedMedia ? myListIds.includes(selectedMedia.tmdbId) : false}
