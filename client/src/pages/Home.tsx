@@ -189,8 +189,10 @@ export default function Home() {
   const handlePlayEpisode = async (seasonNumber: number, episodeNumber: number) => {
     if (!selectedMedia || !seriesData) return;
     
-    const driveUrl = seriesData.temporadas[seasonNumber.toString()]?.[episodeNumber - 1];
-    const totalEpisodes = seriesData.temporadas[seasonNumber.toString()]?.length || 1;
+    const seasonKey = seasonNumber.toString();
+    const seasonEpisodes = seriesData.temporadas[seasonKey as keyof typeof seriesData.temporadas] as string[] | undefined;
+    const driveUrl = seasonEpisodes?.[episodeNumber - 1];
+    const totalEpisodes = seasonEpisodes?.length || 1;
     
     let episodeName = `Episódio ${episodeNumber}`;
     try {
@@ -225,8 +227,10 @@ export default function Home() {
   const handleEpisodeChange = async (newEpisodeNumber: number) => {
     if (!playerConfig || !playerConfig.seasonNumber || !seriesData) return;
     
-    const driveUrl = seriesData.temporadas[playerConfig.seasonNumber.toString()]?.[newEpisodeNumber - 1];
-    const totalEpisodes = seriesData.temporadas[playerConfig.seasonNumber.toString()]?.length || 1;
+    const seasonKey = playerConfig.seasonNumber.toString();
+    const seasonEpisodes = seriesData.temporadas[seasonKey as keyof typeof seriesData.temporadas] as string[] | undefined;
+    const driveUrl = seasonEpisodes?.[newEpisodeNumber - 1];
+    const totalEpisodes = seasonEpisodes?.length || 1;
     
     let episodeName = `Episódio ${newEpisodeNumber}`;
     try {
@@ -388,6 +392,7 @@ export default function Home() {
           setMobileTab('home');
         }}
         query={searchQuery}
+        onQueryChange={setSearchQuery}
         results={searchResults}
         isLoading={isSearching}
         onMediaClick={handleMediaClick}

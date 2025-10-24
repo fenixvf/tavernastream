@@ -111,7 +111,9 @@ export default function MyListPage() {
   const handlePlayEpisode = (seasonNumber: number, episodeNumber: number) => {
     if (!selectedMedia || !seriesData) return;
     
-    const driveUrl = seriesData.temporadas[seasonNumber.toString()]?.[episodeNumber - 1];
+    const seasonKey = seasonNumber.toString();
+    const seasonEpisodes = seriesData.temporadas[seasonKey as keyof typeof seriesData.temporadas] as string[] | undefined;
+    const driveUrl = seasonEpisodes?.[episodeNumber - 1];
     
     setPlayerConfig({
       tmdbId: selectedMedia.tmdbId,
@@ -234,6 +236,7 @@ export default function MyListPage() {
           setSearchQuery('');
         }}
         query={searchQuery}
+        onQueryChange={setSearchQuery}
         results={searchResults}
         isLoading={isSearching}
         onMediaClick={handleMediaClick}
