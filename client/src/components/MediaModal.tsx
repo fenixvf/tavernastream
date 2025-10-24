@@ -126,7 +126,7 @@ export function MediaModal({
 
           {/* Action Buttons */}
           <div className="flex items-center gap-3">
-            {mediaType === 'movie' && onPlayMovie && (
+            {mediaType === 'movie' && (
               <Button size="lg" className="gap-2" onClick={onPlayMovie} data-testid="button-modal-play">
                 <Play className="w-5 h-5 fill-current" />
                 Assistir Agora

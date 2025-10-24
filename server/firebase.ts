@@ -115,7 +115,8 @@ export async function getAllMovieIds(): Promise<number[]> {
   
   return Object.keys(filmes)
     .map(Number)
-    .filter(id => !isNaN(id) && id > 0);
+    .filter(id => !isNaN(id) && id > 0)
+    .reverse();
 }
 
 export async function getAllSeriesIds(): Promise<number[]> {
@@ -126,5 +127,6 @@ export async function getAllSeriesIds(): Promise<number[]> {
   
   return Object.keys(seriesBin)
     .map(Number)
-    .filter(id => !isNaN(id) && id > 0);
+    .filter(id => !isNaN(id) && id > 0)
+    .reverse();
 }
