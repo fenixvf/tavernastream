@@ -19,18 +19,18 @@ import {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
-  // Get hero media (até 5 últimos itens rotacionados dos bancos Firebase)
+  // Get hero media (primeiros itens dos bancos Firebase que são os mais recentes)
   app.get("/api/media/hero", async (req, res) => {
     try {
-      // Pegar os IDs dos bancos Firebase - Object.keys() mantém a ordem de inserção
+      // Pegar os IDs dos bancos Firebase - primeiros são os mais recentes
       const [movieIds, seriesIds] = await Promise.all([
         getAllMovieIds(),
         getAllSeriesIds()
       ]);
       
-      // Pegar os últimos IDs (3 filmes e 2 séries para balancear melhor)
-      const lastMovieIds = movieIds.slice(-3);
-      const lastSeriesIds = seriesIds.slice(-2);
+      // Pegar os primeiros IDs (3 filmes e 2 séries para balancear melhor)
+      const lastMovieIds = movieIds.slice(0, 3);
+      const lastSeriesIds = seriesIds.slice(0, 2);
       
       const movies: MediaItem[] = [];
       const series: MediaItem[] = [];
@@ -160,8 +160,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.error(`Error fetching series ${tmdbId}:`, error);
         }
       }
-      
-      allMedia.reverse();
       
       res.json(allMedia);
     } catch (error) {

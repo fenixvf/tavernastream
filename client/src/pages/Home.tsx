@@ -10,9 +10,11 @@ import { PlayerOverlay } from '@/components/PlayerOverlay';
 import { SearchOverlay } from '@/components/SearchOverlay';
 import { BrowseOverlay } from '@/components/BrowseOverlay';
 import { MobileNav } from '@/components/MobileNav';
+import { ReleaseCountdown } from '@/components/ReleaseCountdown';
 import { Loader2 } from 'lucide-react';
 import type { MediaItem, TMDBDetails, SeriesBinData, TMDBEpisode } from '@shared/schema';
 import { useWatchProgress } from '@/hooks/use-watch-progress';
+import { releaseConfig } from '@/lib/releaseConfig';
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -85,7 +87,7 @@ export default function Home() {
     })
     .filter(Boolean) as MediaItem[];
 
-  // Get new releases (last 10 items)
+  // Get new releases (first 10 items mantém a ordem do database)
   const newReleases = allMedia?.slice(0, 10) || [];
 
   // Categorize media by genre
@@ -421,6 +423,17 @@ export default function Home() {
         activeTab={mobileTab}
         onTabChange={setMobileTab}
       />
+
+      {/* Release Countdown */}
+      {releaseConfig.enabled && (
+        <ReleaseCountdown
+          targetTmdbId={releaseConfig.targetTmdbId}
+          targetMediaType={releaseConfig.targetMediaType}
+          targetTitle={releaseConfig.targetTitle}
+          releaseTimestamp={releaseConfig.releaseTimestamp}
+          backdropPath={releaseConfig.backdropPath}
+        />
+      )}
     </div>
   );
 }
