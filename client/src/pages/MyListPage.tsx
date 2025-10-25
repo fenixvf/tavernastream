@@ -200,6 +200,7 @@ export default function MyListPage() {
                 onAddToList={() => handleAddToList(media)}
                 isInList={true}
                 allProgress={watchProgress}
+                onRemove={() => handleAddToList(media)}
               />
             ))}
           </div>
