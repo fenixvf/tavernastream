@@ -75,7 +75,7 @@ export function MediaCard({ media, onClick, onAddToList, isInList, allProgress =
           <Button
             size="icon"
             variant="ghost"
-            className="absolute top-2 left-2 z-20 rounded-full w-7 h-7 bg-black/70 backdrop-blur-sm text-white hover:bg-red-600/90 transition-all opacity-0 group-hover:opacity-100"
+            className="absolute top-2 left-2 z-20 rounded-full w-8 h-8 bg-black/80 backdrop-blur-sm text-white hover:bg-red-600/90 transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100"
             onClick={(e) => {
               e.stopPropagation();
               onRemove();
@@ -90,7 +90,7 @@ export function MediaCard({ media, onClick, onAddToList, isInList, allProgress =
         <Button
           size="icon"
           variant="ghost"
-          className={`absolute ${onRemove ? 'top-11' : 'top-2'} left-2 z-10 rounded-full w-8 h-8 backdrop-blur-sm transition-opacity ${
+          className={`absolute ${onRemove ? 'top-12' : 'top-2'} left-2 z-10 rounded-full w-8 h-8 backdrop-blur-sm transition-opacity ${
             isHovered || isInList ? 'opacity-100' : 'opacity-0'
           } ${isInList ? 'bg-primary/20 text-primary' : 'bg-black/50 text-white hover:bg-black/70'}`}
           onClick={(e) => {
