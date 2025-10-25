@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronRightCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MediaCard } from './MediaCard';
 import type { MediaItem, WatchProgress } from '@shared/schema';
@@ -13,9 +13,10 @@ interface CategoryRowProps {
   allProgress?: WatchProgress[];
   showProgress?: boolean;
   onRemove?: (media: MediaItem) => void;
+  onBrowseClick?: () => void;
 }
 
-export function CategoryRow({ title, media, onMediaClick, onAddToList, myListIds, allProgress, showProgress = false, onRemove }: CategoryRowProps) {
+export function CategoryRow({ title, media, onMediaClick, onAddToList, myListIds, allProgress, showProgress = false, onRemove, onBrowseClick }: CategoryRowProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: 'left' | 'right') => {
@@ -33,9 +34,23 @@ export function CategoryRow({ title, media, onMediaClick, onAddToList, myListIds
   return (
     <div className="relative group/row mb-8 md:mb-12">
       {/* Category Title */}
-      <h2 className="text-2xl md:text-3xl font-bold text-primary mb-4 px-4" data-testid={`text-category-${title}`}>
-        {title}
-      </h2>
+      <div className="flex items-center justify-between mb-4 px-4">
+        <h2 className="text-2xl md:text-3xl font-bold text-primary" data-testid={`text-category-${title}`}>
+          {title}
+        </h2>
+        {onBrowseClick && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
+            onClick={onBrowseClick}
+            data-testid={`button-see-more-${title}`}
+          >
+            Ver Mais
+            <ChevronRightCircle className="w-4 h-4" />
+          </Button>
+        )}
+      </div>
 
       {/* Scroll Container */}
       <div className="relative px-4">

@@ -70,11 +70,27 @@ export function MediaCard({ media, onClick, onAddToList, isInList, allProgress =
           )}
         </div>
 
+        {/* Botão X para remover - canto superior esquerdo */}
+        {onRemove && (
+          <Button
+            size="icon"
+            variant="ghost"
+            className="absolute top-2 left-2 z-20 rounded-full w-7 h-7 bg-black/70 backdrop-blur-sm text-white hover:bg-red-600/90 transition-all opacity-0 group-hover:opacity-100"
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemove();
+            }}
+            data-testid={`button-remove-${media.tmdbId}`}
+          >
+            <span className="text-sm font-bold">✕</span>
+          </Button>
+        )}
+
         {/* Add to List Button */}
         <Button
           size="icon"
           variant="ghost"
-          className={`absolute top-2 left-2 z-10 rounded-full w-8 h-8 backdrop-blur-sm transition-opacity ${
+          className={`absolute ${onRemove ? 'top-11' : 'top-2'} left-2 z-10 rounded-full w-8 h-8 backdrop-blur-sm transition-opacity ${
             isHovered || isInList ? 'opacity-100' : 'opacity-0'
           } ${isInList ? 'bg-primary/20 text-primary' : 'bg-black/50 text-white hover:bg-black/70'}`}
           onClick={(e) => {
@@ -96,22 +112,6 @@ export function MediaCard({ media, onClick, onAddToList, isInList, allProgress =
             )}
             <Progress value={watchProgress.progress} className="h-1" />
           </div>
-        )}
-
-        {/* Botão X para remover do Continue Assistindo */}
-        {onRemove && (
-          <Button
-            size="icon"
-            variant="ghost"
-            className="absolute bottom-2 right-2 z-10 rounded-full w-7 h-7 bg-black/70 backdrop-blur-sm text-white hover:bg-red-600/90 transition-all opacity-0 group-hover:opacity-100"
-            onClick={(e) => {
-              e.stopPropagation();
-              onRemove();
-            }}
-            data-testid={`button-remove-continue-watching-${media.tmdbId}`}
-          >
-            <span className="text-sm font-bold">✕</span>
-          </Button>
         )}
 
         {/* Hover Overlay with Title */}

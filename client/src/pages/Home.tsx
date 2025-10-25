@@ -462,6 +462,7 @@ export default function Home() {
                 onAddToList={handleAddToList}
                 myListIds={myListIds}
                 allProgress={watchProgress}
+                onBrowseClick={() => setIsBrowseOpen(true)}
               />
             )
           ))}
