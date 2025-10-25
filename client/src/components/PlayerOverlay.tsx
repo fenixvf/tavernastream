@@ -56,17 +56,19 @@ export function PlayerOverlay({
     }
   }, [isOpen, autoPlayPlayerFlix]);
 
-  const saveCurrentProgress = useCallback(() => {
+  const saveCurrentProgress = useCallback((forceCurrentTime?: number) => {
     if (watchStartTime && selectedPlayer === 'playerflix') {
       const watchDuration = Date.now() - watchStartTime;
-      const watchedMinutes = watchDuration / 60000;
       const watchedSeconds = watchDuration / 1000;
       
+      // Usar tempo fornecido ou calcular baseado na duração da sessão
+      const currentTime = forceCurrentTime !== undefined ? forceCurrentTime : Math.floor(watchedSeconds);
+      
       // Salvar progresso se assistiu pelo menos 30 segundos
-      if (watchedSeconds >= 30) {
+      if (currentTime >= 30 || forceCurrentTime !== undefined) {
         // Estimar duração total baseado no tipo de mídia
         const estimatedDuration = mediaType === 'movie' ? 7200 : 2400; // 2h para filmes, 40min para episódios
-        const progressPercent = Math.min(95, (watchedSeconds / estimatedDuration) * 100);
+        const progressPercent = Math.min(95, (currentTime / estimatedDuration) * 100);
         const isCompleted = progressPercent >= 90;
         
         saveProgress({
@@ -76,7 +78,7 @@ export function PlayerOverlay({
           posterPath: posterPath || null,
           backdropPath: backdropPath || null,
           progress: isCompleted ? 100 : progressPercent,
-          currentTime: Math.floor(watchedSeconds), // Tempo assistido em segundos
+          currentTime: currentTime, // Tempo real do vídeo em segundos
           totalDuration: estimatedDuration, // Duração estimada em segundos
           duration: watchDuration, // Duração da sessão em ms (compatibilidade)
           seasonNumber,
@@ -97,12 +99,34 @@ export function PlayerOverlay({
     setSelectedPlayer(playerType);
   };
 
+  // Salvar progresso periodicamente (a cada 30 segundos)
+  useEffect(() => {
+    if (!isOpen || !selectedPlayer) return;
+    
+    const interval = setInterval(() => {
+      if (watchStartTime) {
+        const elapsed = (Date.now() - watchStartTime) / 1000;
+        const estimatedTime = resumeTime ? resumeTime + elapsed : elapsed;
+        saveCurrentProgress(Math.floor(estimatedTime));
+      }
+    }, 30000); // Salvar a cada 30 segundos
+    
+    return () => clearInterval(interval);
+  }, [isOpen, selectedPlayer, watchStartTime, resumeTime, saveCurrentProgress]);
+
   useEffect(() => {
     if (!isOpen) {
-      saveCurrentProgress();
+      // Salvar progresso final ao fechar
+      if (watchStartTime) {
+        const elapsed = (Date.now() - watchStartTime) / 1000;
+        const estimatedTime = resumeTime ? resumeTime + elapsed : elapsed;
+        saveCurrentProgress(Math.floor(estimatedTime));
+      }
+      // Resetar estados ao fechar para permitir nova seleção
+      setSelectedPlayer(null);
       setWatchStartTime(null);
     }
-  }, [isOpen, saveCurrentProgress]);
+  }, [isOpen, watchStartTime, resumeTime, saveCurrentProgress]);
 
   const handleDriveError = () => {
     setShowOverloadWarning(true);
@@ -118,10 +142,12 @@ export function PlayerOverlay({
       baseUrl = `https://playerflixapi.com/serie/${tmdbId}/${seasonNumber}/${episodeNumber}`;
     }
     
-    // Adicionar tempo de retomada se fornecido (PlayerFlix pode ter seu próprio sistema)
+    // Adicionar tempo de retomada se fornecido
+    // PlayerFlix suporta múltiplos formatos de tempo: ?t=, #t=, &start=
     if (baseUrl && resumeTime && resumeTime > 10) {
-      // Tentar com query parameter e hash (depende da API do PlayerFlix)
-      baseUrl += `?t=${Math.floor(resumeTime)}#t=${Math.floor(resumeTime)}`;
+      const timeInSeconds = Math.floor(resumeTime);
+      // Tentar múltiplos formatos para maximizar compatibilidade
+      baseUrl += `?start=${timeInSeconds}&t=${timeInSeconds}#t=${timeInSeconds}`;
     }
     
     return baseUrl;
@@ -133,7 +159,11 @@ export function PlayerOverlay({
 
   const handlePreviousEpisode = () => {
     if (episodeNumber && episodeNumber > 1 && onEpisodeChange) {
-      saveCurrentProgress();
+      if (watchStartTime) {
+        const elapsed = (Date.now() - watchStartTime) / 1000;
+        const estimatedTime = resumeTime ? resumeTime + elapsed : elapsed;
+        saveCurrentProgress(Math.floor(estimatedTime));
+      }
       setSelectedPlayer(null);
       setWatchStartTime(null);
       onEpisodeChange(episodeNumber - 1);
@@ -142,7 +172,11 @@ export function PlayerOverlay({
 
   const handleNextEpisode = () => {
     if (episodeNumber && episodeNumber < totalEpisodes && onEpisodeChange) {
-      saveCurrentProgress();
+      if (watchStartTime) {
+        const elapsed = (Date.now() - watchStartTime) / 1000;
+        const estimatedTime = resumeTime ? resumeTime + elapsed : elapsed;
+        saveCurrentProgress(Math.floor(estimatedTime));
+      }
       setSelectedPlayer(null);
       setWatchStartTime(null);
       onEpisodeChange(episodeNumber + 1);

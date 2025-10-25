@@ -56,7 +56,7 @@ export function MediaModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0 bg-card border-card-border w-[95vw] md:w-full">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0 bg-card border-card-border w-[95vw] sm:w-[90vw] md:w-full">
         <DialogTitle className="sr-only">{title}</DialogTitle>
         <DialogDescription className="sr-only">
           {details.overview || 'Detalhes do conteúdo'}
@@ -84,23 +84,23 @@ export function MediaModal({
         )}
 
         {/* Info Section */}
-        <div className="p-6 md:p-8 space-y-6">
+        <div className="p-4 sm:p-6 md:p-8 space-y-4 md:space-y-6">
           {/* Title and Metadata */}
           <div className="space-y-3">
-            <h2 className="text-3xl md:text-4xl font-bold" data-testid="text-modal-title">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold break-words" data-testid="text-modal-title">
               {title}
             </h2>
 
-            <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
               <Badge className="bg-primary/20 text-primary border-primary/30 font-semibold" data-testid="badge-modal-rating">
                 ★ {details.vote_average.toFixed(1)}
               </Badge>
-              {year && <span className="text-muted-foreground">{year}</span>}
+              {year && <span className="text-muted-foreground text-sm sm:text-base">{year}</span>}
               {details.runtime && (
-                <span className="text-muted-foreground">{details.runtime} min</span>
+                <span className="text-muted-foreground text-sm sm:text-base">{details.runtime} min</span>
               )}
               {details.number_of_seasons && (
-                <span className="text-muted-foreground">
+                <span className="text-muted-foreground text-sm sm:text-base">
                   {details.number_of_seasons} {details.number_of_seasons === 1 ? 'Temporada' : 'Temporadas'}
                 </span>
               )}
@@ -120,41 +120,42 @@ export function MediaModal({
 
           {/* Synopsis */}
           <div>
-            <h3 className="text-lg font-semibold mb-2">Sinopse</h3>
-            <p className="text-muted-foreground leading-relaxed">{details.overview}</p>
+            <h3 className="text-base sm:text-lg font-semibold mb-2">Sinopse</h3>
+            <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">{details.overview}</p>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
             {mediaType === 'movie' && onPlayMovie && (
-              <Button size="lg" className="gap-2" onClick={() => onPlayMovie()} data-testid="button-modal-play">
-                <Play className="w-5 h-5 fill-current" />
+              <Button size="lg" className="gap-2 text-sm sm:text-base" onClick={() => onPlayMovie()} data-testid="button-modal-play">
+                <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-current" />
                 Assistir Agora
               </Button>
             )}
             <Button
               size="lg"
               variant={isInList ? 'default' : 'outline'}
-              className="gap-2"
+              className="gap-2 text-sm sm:text-base"
               onClick={onAddToList}
               data-testid="button-modal-add-list"
             >
-              <Heart className={`w-5 h-5 ${isInList ? 'fill-current' : ''}`} />
-              {isInList ? 'Na Minha Lista' : 'Adicionar à Lista'}
+              <Heart className={`w-4 h-4 sm:w-5 sm:h-5 ${isInList ? 'fill-current' : ''}`} />
+              <span className="hidden xs:inline">{isInList ? 'Na Minha Lista' : 'Adicionar à Lista'}</span>
+              <span className="xs:hidden">{isInList ? 'Na Lista' : 'Adicionar'}</span>
             </Button>
           </div>
 
           {/* Episodes (Series Only) */}
           {mediaType === 'tv' && details?.seasons && details.seasons.length > 0 && (
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Episódios</h3>
+              <h3 className="text-base sm:text-lg font-semibold">Episódios</h3>
               <Tabs value={selectedSeason} onValueChange={setSelectedSeason} className="w-full">
-                <TabsList className="w-full justify-start overflow-x-auto flex-nowrap">
+                <TabsList className="w-full justify-start overflow-x-auto flex-nowrap scrollbar-hide">
                   {details.seasons.map((season) => {
                     if (season.season_number === 0) return null;
                     return (
-                      <TabsTrigger key={season.season_number} value={String(season.season_number)} data-testid={`tab-season-${season.season_number}`}>
-                        Temporada {season.season_number}
+                      <TabsTrigger key={season.season_number} value={String(season.season_number)} className="text-xs sm:text-sm whitespace-nowrap" data-testid={`tab-season-${season.season_number}`}>
+                        T{season.season_number}
                       </TabsTrigger>
                     );
                   })}
@@ -166,7 +167,7 @@ export function MediaModal({
                   const firebaseEpisodes = seriesData?.temporadas?.[seasonNumber];
                   
                   return (
-                    <TabsContent key={seasonNumber} value={String(seasonNumber)} className="space-y-3 mt-4">
+                    <TabsContent key={seasonNumber} value={String(seasonNumber)} className="space-y-2 sm:space-y-3 mt-4">
                       {(tmdbEpisodes.length > 0 ? tmdbEpisodes : Array.from({ length: season.episode_count }, (_, i) => ({ episode_number: i + 1 }))).map((episodeData: any, index: number) => {
                         const episodeNumber = episodeData.episode_number || index + 1;
                         const progress = getProgress(details.id, 'tv', seasonNumber, episodeNumber);
@@ -180,67 +181,70 @@ export function MediaModal({
                             className="w-full rounded-lg overflow-hidden bg-secondary hover-elevate active-elevate-2 transition-all group"
                             data-testid={`button-episode-${seasonNumber}-${episodeNumber}`}
                           >
-                            <div className="flex gap-3 p-3">
+                            <div className="flex gap-2 sm:gap-3 p-2 sm:p-3">
                               {/* Thumbnail */}
-                              <div className="relative w-24 h-16 md:w-40 md:h-24 flex-shrink-0 rounded-md overflow-hidden bg-muted">
+                              <div className="relative w-20 h-14 sm:w-24 sm:h-16 md:w-40 md:h-24 flex-shrink-0 rounded-md overflow-hidden bg-muted">
                                 {episodeData?.still_path ? (
                                   <img
                                     src={`https://image.tmdb.org/t/p/w300${episodeData.still_path}`}
                                     alt={episodeData.name}
                                     className="w-full h-full object-cover"
+                                    loading="lazy"
                                   />
                                 ) : (
-                                  <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-muted-foreground">
+                                  <div className="w-full h-full flex items-center justify-center text-2xl sm:text-3xl md:text-4xl font-bold text-muted-foreground">
                                     {episodeNumber}
                                   </div>
                                 )}
                                 {isWatched && (
                                   <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                                    <div className="bg-primary rounded-full p-2">
-                                      <Check className="w-6 h-6 text-primary-foreground" />
+                                    <div className="bg-primary rounded-full p-1 sm:p-2">
+                                      <Check className="w-4 h-4 sm:w-6 sm:h-6 text-primary-foreground" />
                                     </div>
                                   </div>
                                 )}
                                 {!isWatched && progress && progress.progress > 0 && (
                                   <div className="absolute bottom-0 left-0 right-0 h-1 bg-muted">
                                     <div 
-                                      className="h-full bg-primary"
+                                      className="h-full bg-primary transition-all"
                                       style={{ width: `${progress.progress}%` }}
                                     />
                                   </div>
                                 )}
                                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
-                                  <Play className="w-10 h-10 text-white fill-white" />
+                                  <Play className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-white fill-white" />
                                 </div>
                               </div>
                               
                               {/* Info */}
-                              <div className="flex-1 text-left min-w-0 overflow-hidden">
-                                <div className="flex items-start justify-between gap-2">
-                                  <div className="flex-1 min-w-0 overflow-hidden">
-                                    <div className="flex items-center gap-2 mb-1">
-                                      <span className="text-xs md:text-sm font-semibold text-muted-foreground shrink-0">
+                              <div className="flex-1 text-left min-w-0">
+                                <div className="flex items-start justify-between gap-1 sm:gap-2">
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-1 sm:gap-2 mb-0.5 sm:mb-1">
+                                      <span className="text-xs sm:text-sm font-semibold text-muted-foreground shrink-0">
                                         {episodeNumber}
                                       </span>
-                                      <h4 className="text-sm md:text-base font-semibold truncate">
+                                      <h4 className="text-xs sm:text-sm md:text-base font-semibold truncate">
                                         {episodeData?.name || `Episódio ${episodeNumber}`}
                                       </h4>
                                     </div>
                                     {episodeData?.overview && (
-                                      <p className="text-xs md:text-sm text-muted-foreground line-clamp-2">
+                                      <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1 sm:line-clamp-2">
                                         {episodeData.overview}
                                       </p>
                                     )}
-                                    {!hasDriveUrl && (
-                                      <p className="text-xs text-muted-foreground/70 mt-1">
-                                        PlayerFlix disponível
-                                      </p>
-                                    )}
-                                    {!isWatched && progress && progress.progress > 0 && (
-                                      <div className="mt-1">
-                                        <p className="text-xs text-muted-foreground/70">{Math.round(progress.progress)}% assistido</p>
-                                      </div>
-                                    )}
+                                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                      {!hasDriveUrl && (
+                                        <p className="text-xs text-muted-foreground/70">
+                                          PlayerFlix
+                                        </p>
+                                      )}
+                                      {!isWatched && progress && progress.progress > 0 && (
+                                        <p className="text-xs font-semibold text-primary/90">
+                                          {Math.round(progress.progress)}% assistido
+                                        </p>
+                                      )}
+                                    </div>
                                   </div>
                                 </div>
                               </div>
