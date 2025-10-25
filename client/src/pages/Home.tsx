@@ -43,16 +43,18 @@ export default function Home() {
 
   const { getContinueWatching, watchProgress, getProgress, removeFromContinueWatching } = useWatchProgress();
 
-  // Fetch all media (movies + series) - atualiza a cada 30 segundos
+  // Fetch all media (movies + series) - atualiza a cada 15 segundos
   const { data: allMedia, isLoading: isLoadingMedia } = useQuery<MediaItem[]>({
     queryKey: ['/api/media/all'],
-    refetchInterval: 30000,
+    refetchInterval: 15000,
+    staleTime: 10000,
   });
 
   // Fetch hero media (últimos 4 itens rotacionados)
   const { data: heroMediaItems = [] } = useQuery<MediaItem[]>({
     queryKey: ['/api/media/hero'],
-    refetchInterval: 30000,
+    refetchInterval: 15000,
+    staleTime: 10000,
   });
 
   // Fetch my list

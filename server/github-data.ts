@@ -6,8 +6,8 @@ interface CacheEntry<T> {
   etag?: string;
 }
 
-const CACHE_TTL = 30000; // 30 segundos
-const POLL_INTERVAL = 60000; // 1 minuto - verificar atualizações
+const CACHE_TTL = 10000; // 10 segundos - cache curto para resposta rápida
+const POLL_INTERVAL = 15000; // 15 segundos - verificar atualizações frequentemente
 
 let moviesCacheData: CacheEntry<MovieBinData> | null = null;
 let seriesCacheData: CacheEntry<SeriesBinData> | null = null;
@@ -38,7 +38,15 @@ async function fetchFromGitHub<T>(url: string, cache: CacheEntry<T> | null): Pro
     throw new Error(`Failed to fetch from GitHub: ${response.statusText}`);
   }
 
-  const data = await response.json() as T;
+  let data: T;
+  try {
+    data = await response.json() as T;
+  } catch (error) {
+    const fileName = url.includes('filmes') ? 'filmes.json' : 'series.json';
+    console.error(`❌ JSON Parse Error in ${fileName}:`, error);
+    throw new Error(`Invalid JSON in GitHub file ${fileName}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+
   const etag = response.headers.get('etag') || undefined;
 
   return {
@@ -60,10 +68,19 @@ async function getCachedOrFetch<T>(
     return cache.data;
   }
 
-  // Buscar do GitHub
-  const newCache = await fetchFromGitHub(url, cache);
-  setCacheData(newCache);
-  return newCache.data;
+  try {
+    // Buscar do GitHub
+    const newCache = await fetchFromGitHub(url, cache);
+    setCacheData(newCache);
+    return newCache.data;
+  } catch (error) {
+    // Se houver erro e temos cache antigo, usar o cache
+    if (cache) {
+      console.warn('⚠️ Using cached data due to fetch error');
+      return cache.data;
+    }
+    throw error;
+  }
 }
 
 export async function getMovieBin(): Promise<MovieBinData> {
@@ -132,27 +149,37 @@ export async function getAllSeriesIds(): Promise<number[]> {
 function startPolling() {
   setInterval(async () => {
     try {
-      // Invalida o cache para forçar atualização na próxima requisição
+      console.log('[GitHub Poll] Checking for updates...');
+      
+      // Busca novas versões usando ETag
       const [newMoviesCache, newSeriesCache] = await Promise.all([
         fetchFromGitHub(MOVIES_RAW_URL, moviesCacheData),
         fetchFromGitHub(SERIES_RAW_URL, seriesCacheData)
       ]);
       
-      if (newMoviesCache.data !== moviesCacheData?.data) {
+      // Compara o timestamp para detectar mudanças
+      const moviesUpdated = !moviesCacheData || newMoviesCache.timestamp !== moviesCacheData.timestamp;
+      const seriesUpdated = !seriesCacheData || newSeriesCache.timestamp !== seriesCacheData.timestamp;
+      
+      if (moviesUpdated) {
         moviesCacheData = newMoviesCache;
-        console.log('Movies catalog updated from GitHub');
+        console.log('[GitHub Poll] ✅ Movies catalog updated from GitHub');
       }
       
-      if (newSeriesCache.data !== seriesCacheData?.data) {
+      if (seriesUpdated) {
         seriesCacheData = newSeriesCache;
-        console.log('Series catalog updated from GitHub');
+        console.log('[GitHub Poll] ✅ Series catalog updated from GitHub');
+      }
+      
+      if (!moviesUpdated && !seriesUpdated) {
+        console.log('[GitHub Poll] No changes detected');
       }
     } catch (error) {
-      console.error('Error polling GitHub for updates:', error);
+      console.error('[GitHub Poll] ❌ Error polling GitHub for updates:', error);
     }
   }, POLL_INTERVAL);
 }
 
 // Iniciar polling quando o módulo for carregado
 startPolling();
-console.log('GitHub data polling started - checking for updates every 60 seconds');
+console.log(`[GitHub Data] Polling started - checking for updates every ${POLL_INTERVAL/1000} seconds`);
