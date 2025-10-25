@@ -39,7 +39,8 @@ TavernaStream is a full-stack web application designed for streaming movies and 
 - **X Button Position**: X button positioned at top-left corner of cards for quick removal
 - **Continue Watching X Button**: Removes individual items from "Continue Assistindo" without reopening the modal
 - **My List X Button**: Quick removal of content from the watchlist on "Minha Lista" page
-- **Consistent UX**: Both removal buttons share the same visual design and behavior (appears on hover, red accent on hover)
+- **Mobile & Desktop Support**: X button is always visible on mobile devices; appears on hover for desktop users
+- **Consistent UX**: Both removal buttons share the same visual design and behavior (red accent on hover)
 - **Smart Button Positioning**: Heart button dynamically adjusts position to avoid overlap when X button is present
 
 ### Category Navigation (October 25, 2025)
