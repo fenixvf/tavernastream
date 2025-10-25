@@ -36,9 +36,16 @@ TavernaStream is a full-stack web application designed for streaming movies and 
   - Improved border styles and shadows for premium feel
 
 ### Quick Removal Buttons (October 25, 2025)
-- **Continue Watching X Button**: Added hover-activated X button to remove individual items from "Continue Assistindo" without reopening the modal
-- **My List X Button**: Added X button to "Minha Lista" page for quick removal of content from the watchlist
-- **Consistent UX**: Both removal buttons share the same visual design and behavior (bottom-right corner, appears on hover, red accent on hover)
+- **X Button Position**: X button positioned at top-left corner of cards for quick removal
+- **Continue Watching X Button**: Removes individual items from "Continue Assistindo" without reopening the modal
+- **My List X Button**: Quick removal of content from the watchlist on "Minha Lista" page
+- **Consistent UX**: Both removal buttons share the same visual design and behavior (appears on hover, red accent on hover)
+- **Smart Button Positioning**: Heart button dynamically adjusts position to avoid overlap when X button is present
+
+### Category Navigation (October 25, 2025)
+- **"Ver Mais" Button**: Added to all category headers (Filmes, Séries, genres, etc.)
+- **Quick Access**: Clicking "Ver Mais" opens the Browse overlay for easier content exploration
+- **Improved Discovery**: Users can quickly browse full categories without scrolling through all content
 
 ## User Preferences
 
