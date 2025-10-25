@@ -15,7 +15,7 @@ import {
   getAllSeriesIds,
   getMovieUrl,
   getSeriesData,
-} from "./firebase";
+} from "./github-data";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   

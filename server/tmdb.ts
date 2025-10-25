@@ -40,9 +40,21 @@ export async function getSeasonDetails(
   tvId: number,
   seasonNumber: number
 ): Promise<{ episodes: TMDBEpisode[] }> {
-  return tmdbFetch<{ episodes: TMDBEpisode[] }>(
+  const data = await tmdbFetch<{ episodes: TMDBEpisode[] }>(
     `/tv/${tvId}/season/${seasonNumber}`
   );
+  
+  // Filtrar apenas episódios que já foram lançados
+  const today = new Date();
+  today.setHours(23, 59, 59, 999); // Até o fim do dia de hoje
+  
+  const releasedEpisodes = data.episodes.filter(episode => {
+    if (!episode.air_date) return false;
+    const airDate = new Date(episode.air_date);
+    return airDate <= today;
+  });
+  
+  return { episodes: releasedEpisodes };
 }
 
 export async function searchMulti(

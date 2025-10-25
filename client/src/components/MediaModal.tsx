@@ -56,7 +56,7 @@ export function MediaModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0 bg-card border-card-border">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0 bg-card border-card-border w-[95vw] md:w-full">
         <DialogTitle className="sr-only">{title}</DialogTitle>
         <DialogDescription className="sr-only">
           {details.overview || 'Detalhes do conteúdo'}
@@ -180,9 +180,9 @@ export function MediaModal({
                             className="w-full rounded-lg overflow-hidden bg-secondary hover-elevate active-elevate-2 transition-all group"
                             data-testid={`button-episode-${seasonNumber}-${episodeNumber}`}
                           >
-                            <div className="flex gap-4 p-3">
+                            <div className="flex gap-3 p-3">
                               {/* Thumbnail */}
-                              <div className="relative w-40 h-24 flex-shrink-0 rounded-md overflow-hidden bg-muted">
+                              <div className="relative w-24 h-16 md:w-40 md:h-24 flex-shrink-0 rounded-md overflow-hidden bg-muted">
                                 {episodeData?.still_path ? (
                                   <img
                                     src={`https://image.tmdb.org/t/p/w300${episodeData.still_path}`}
@@ -215,19 +215,19 @@ export function MediaModal({
                               </div>
                               
                               {/* Info */}
-                              <div className="flex-1 text-left min-w-0">
+                              <div className="flex-1 text-left min-w-0 overflow-hidden">
                                 <div className="flex items-start justify-between gap-2">
-                                  <div className="flex-1 min-w-0">
+                                  <div className="flex-1 min-w-0 overflow-hidden">
                                     <div className="flex items-center gap-2 mb-1">
-                                      <span className="text-sm font-semibold text-muted-foreground">
+                                      <span className="text-xs md:text-sm font-semibold text-muted-foreground shrink-0">
                                         {episodeNumber}
                                       </span>
-                                      <h4 className="font-semibold truncate">
+                                      <h4 className="text-sm md:text-base font-semibold truncate">
                                         {episodeData?.name || `Episódio ${episodeNumber}`}
                                       </h4>
                                     </div>
                                     {episodeData?.overview && (
-                                      <p className="text-sm text-muted-foreground line-clamp-2">
+                                      <p className="text-xs md:text-sm text-muted-foreground line-clamp-2">
                                         {episodeData.overview}
                                       </p>
                                     )}
@@ -235,6 +235,11 @@ export function MediaModal({
                                       <p className="text-xs text-muted-foreground/70 mt-1">
                                         PlayerFlix disponível
                                       </p>
+                                    )}
+                                    {!isWatched && progress && progress.progress > 0 && (
+                                      <div className="mt-1">
+                                        <p className="text-xs text-muted-foreground/70">{Math.round(progress.progress)}% assistido</p>
+                                      </div>
                                     )}
                                   </div>
                                 </div>

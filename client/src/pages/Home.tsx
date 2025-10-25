@@ -41,7 +41,7 @@ export default function Home() {
     resumeTime?: number;
   } | null>(null);
 
-  const { getContinueWatching, watchProgress, getProgress } = useWatchProgress();
+  const { getContinueWatching, watchProgress, getProgress, removeFromContinueWatching } = useWatchProgress();
 
   // Fetch all media (movies + series) - atualiza a cada 30 segundos
   const { data: allMedia, isLoading: isLoadingMedia } = useQuery<MediaItem[]>({
@@ -358,6 +358,17 @@ export default function Home() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleRemoveFromContinueWatching = (media: MediaItem) => {
+    const progress = continueWatchingData.find(p => p.tmdbId === media.tmdbId);
+    if (!progress) return;
+    
+    if (media.mediaType === 'movie') {
+      removeFromContinueWatching(media.tmdbId, 'movie');
+    } else if (progress.seasonNumber && progress.episodeNumber) {
+      removeFromContinueWatching(media.tmdbId, 'tv', progress.seasonNumber, progress.episodeNumber);
+    }
+  };
+
   useEffect(() => {
     if (mobileTab === 'search') {
       setIsSearchOpen(true);
@@ -418,11 +429,12 @@ export default function Home() {
               key="continue-watching"
               title="Continuar Assistindo"
               media={continueWatching}
-              onMediaClick={handleMediaClick}
+              onMediaClick={handleContinueWatching}
               onAddToList={handleAddToList}
               myListIds={myListIds}
               allProgress={watchProgress}
-              onContinueWatching={handleContinueWatching}
+              showProgress={true}
+              onRemove={handleRemoveFromContinueWatching}
             />
           )}
 

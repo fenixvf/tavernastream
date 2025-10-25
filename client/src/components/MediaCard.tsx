@@ -11,9 +11,11 @@ interface MediaCardProps {
   onAddToList: () => void;
   isInList: boolean;
   allProgress?: WatchProgress[];
+  showProgress?: boolean;
+  onRemove?: () => void;
 }
 
-export function MediaCard({ media, onClick, onAddToList, isInList, allProgress = [] }: MediaCardProps) {
+export function MediaCard({ media, onClick, onAddToList, isInList, allProgress = [], showProgress = false, onRemove }: MediaCardProps) {
   const [isHovered, setIsHovered] = useState(false);
 
   const posterUrl = media.posterPath
@@ -84,8 +86,8 @@ export function MediaCard({ media, onClick, onAddToList, isInList, allProgress =
           <Heart className={`w-4 h-4 ${isInList ? 'fill-current' : ''}`} />
         </Button>
 
-        {/* Progress Bar e Informação de progresso */}
-        {watchProgress && !isCompleted && watchProgress.progress > 0 && (
+        {/* Progress Bar e Informação de progresso - apenas em Continue Assistindo */}
+        {showProgress && watchProgress && !isCompleted && watchProgress.progress > 0 && (
           <div className="absolute bottom-0 left-0 right-0 z-10 px-2 pb-2 bg-gradient-to-t from-black/90 to-transparent pt-6">
             {watchProgress.episodeName && watchProgress.seasonNumber && watchProgress.episodeNumber && (
               <p className="text-xs text-white/90 font-semibold mb-1 truncate">
@@ -94,6 +96,22 @@ export function MediaCard({ media, onClick, onAddToList, isInList, allProgress =
             )}
             <Progress value={watchProgress.progress} className="h-1" />
           </div>
+        )}
+
+        {/* Botão X para remover do Continue Assistindo */}
+        {onRemove && (
+          <Button
+            size="icon"
+            variant="ghost"
+            className="absolute bottom-2 right-2 z-10 rounded-full w-7 h-7 bg-black/70 backdrop-blur-sm text-white hover:bg-red-600/90 transition-all opacity-0 group-hover:opacity-100"
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemove();
+            }}
+            data-testid={`button-remove-continue-watching-${media.tmdbId}`}
+          >
+            <span className="text-sm font-bold">✕</span>
+          </Button>
         )}
 
         {/* Hover Overlay with Title */}

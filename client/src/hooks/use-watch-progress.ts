@@ -96,6 +96,30 @@ export function useWatchProgress() {
     });
   }, []);
 
+  const removeFromContinueWatching = useCallback((
+    tmdbId: number,
+    mediaType: 'movie' | 'tv',
+    seasonNumber?: number,
+    episodeNumber?: number
+  ) => {
+    setWatchProgress((prev) => {
+      const updated = prev.filter((p) => {
+        if (mediaType === 'movie') {
+          return !(p.tmdbId === tmdbId && p.mediaType === 'movie');
+        } else {
+          return !(
+            p.tmdbId === tmdbId &&
+            p.mediaType === 'tv' &&
+            p.seasonNumber === seasonNumber &&
+            p.episodeNumber === episodeNumber
+          );
+        }
+      });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
   const getContinueWatching = useCallback(() => {
     const now = new Date().getTime();
     const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
@@ -111,5 +135,6 @@ export function useWatchProgress() {
     getProgress,
     clearProgress,
     getContinueWatching,
+    removeFromContinueWatching,
   };
 }
