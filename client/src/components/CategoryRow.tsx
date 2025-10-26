@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import { ChevronLeft, ChevronRight, ChevronRightCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MediaCard } from './MediaCard';
+import { ContinueWatchingCard } from './ContinueWatchingCard';
 import type { MediaItem, WatchProgress } from '@shared/schema';
 
 interface CategoryRowProps {
@@ -17,6 +18,7 @@ interface CategoryRowProps {
 }
 
 export function CategoryRow({ title, media, onMediaClick, onAddToList, myListIds, allProgress, showProgress = false, onRemove, onBrowseClick }: CategoryRowProps) {
+  const isContinueWatching = title === "Continuar Assistindo";
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: 'left' | 'right') => {
@@ -71,19 +73,43 @@ export function CategoryRow({ title, media, onMediaClick, onAddToList, myListIds
           className="flex gap-3 md:gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide scroll-smooth"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          {media.map((item) => (
-            <div key={item.tmdbId} className="flex-none w-[140px] md:w-[200px] snap-start">
-              <MediaCard
-                media={item}
-                onClick={() => onMediaClick(item)}
-                onAddToList={() => onAddToList(item)}
-                isInList={myListIds.includes(item.tmdbId)}
-                allProgress={allProgress}
-                showProgress={showProgress}
-                onRemove={onRemove ? () => onRemove(item) : undefined}
-              />
-            </div>
-          ))}
+          {media.map((item) => {
+            if (isContinueWatching && onRemove && allProgress) {
+              const progress = allProgress.find((p) => {
+                if (item.mediaType === 'movie') {
+                  return p.tmdbId === item.tmdbId && p.mediaType === 'movie';
+                } else {
+                  return p.tmdbId === item.tmdbId && p.mediaType === 'tv';
+                }
+              });
+              
+              if (progress) {
+                return (
+                  <ContinueWatchingCard
+                    key={`${item.tmdbId}-${progress.seasonNumber}-${progress.episodeNumber}`}
+                    media={item}
+                    onClick={() => onMediaClick(item)}
+                    onRemove={() => onRemove(item)}
+                    watchProgress={progress}
+                  />
+                );
+              }
+            }
+            
+            return (
+              <div key={item.tmdbId} className="flex-none w-[140px] md:w-[200px] snap-start">
+                <MediaCard
+                  media={item}
+                  onClick={() => onMediaClick(item)}
+                  onAddToList={() => onAddToList(item)}
+                  isInList={myListIds.includes(item.tmdbId)}
+                  allProgress={allProgress}
+                  showProgress={showProgress}
+                  onRemove={onRemove ? () => onRemove(item) : undefined}
+                />
+              </div>
+            );
+          })}
         </div>
 
         {/* Right Arrow */}

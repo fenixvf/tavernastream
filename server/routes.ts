@@ -101,6 +101,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Check if media exists in catalog
+  app.get("/api/media/check/:id/:type", async (req, res) => {
+    try {
+      const tmdbId = parseInt(req.params.id);
+      const mediaType = req.params.type as 'movie' | 'tv';
+      
+      if (mediaType === 'movie') {
+        const movieIds = await getAllMovieIds();
+        const exists = movieIds.includes(tmdbId);
+        res.json({ exists });
+      } else {
+        const seriesIds = await getAllSeriesIds();
+        const exists = seriesIds.includes(tmdbId);
+        res.json({ exists });
+      }
+    } catch (error) {
+      console.error('Error checking media existence:', error);
+      res.status(500).json({ error: 'Failed to check media existence' });
+    }
+  });
+
   // Get all media (movies + series) with TMDB data
   app.get("/api/media/all", async (req, res) => {
     try {
