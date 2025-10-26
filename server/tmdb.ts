@@ -81,3 +81,12 @@ export async function getPopularMovies(): Promise<{ results: TMDBMovie[] }> {
 export async function getPopularTV(): Promise<{ results: TMDBSeries[] }> {
   return tmdbFetch<{ results: TMDBSeries[] }>('/tv/popular');
 }
+
+export async function getVideos(
+  tmdbId: number,
+  mediaType: 'movie' | 'tv'
+): Promise<{ results: { key: string; type: string; site: string; official: boolean; name: string }[] }> {
+  return tmdbFetch<{ results: { key: string; type: string; site: string; official: boolean; name: string }[] }>(
+    `/${mediaType}/${tmdbId}/videos`
+  );
+}

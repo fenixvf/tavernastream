@@ -9,6 +9,7 @@ import {
   getTVDetails,
   searchMulti,
   getSeasonDetails,
+  getVideos,
 } from "./tmdb";
 import {
   getAllMovieIds,
@@ -207,6 +208,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error fetching media details:', error);
       res.status(500).json({ error: 'Failed to fetch details' });
+    }
+  });
+
+  // Get videos (trailers, teasers, etc.)
+  app.get("/api/media/videos/:id/:type", async (req, res) => {
+    try {
+      const tmdbId = parseInt(req.params.id);
+      const mediaType = req.params.type as 'movie' | 'tv';
+      
+      if (isNaN(tmdbId)) {
+        return res.status(400).json({ error: 'Invalid TMDB ID' });
+      }
+      
+      const videos = await getVideos(tmdbId, mediaType);
+      res.json(videos);
+    } catch (error) {
+      console.error('Error fetching videos:', error);
+      res.status(500).json({ error: 'Failed to fetch videos' });
     }
   });
 
