@@ -6,6 +6,37 @@ TavernaStream is a full-stack web application designed for streaming movies and 
 
 ## Recent Changes (October 2025)
 
+### Enhanced User Experience Features (October 26, 2025)
+- **Continue Watching Improvements**:
+  - Replaced poster cards with 16:9 thumbnail cards showing episode/movie backdrops
+  - Added X button for quick removal from continue watching list
+  - Enhanced episode information display (Season:Episode - Name)
+  - Improved visual feedback with progress bars and hover effects
+  
+- **Release Countdown Enhancement**:
+  - Added semi-transparent backdrop banner showing the upcoming content
+  - Implemented real-time catalog verification (checks GitHub every 30s)
+  - Content access blocking until release time if not in catalog
+  - "Available Now!" message with 5-minute auto-hide after release
+  - Visual lock indicator when content is blocked
+  
+- **Featured Content Banner ("Destaque do Mês")**:
+  - New premium-quality banner component below "Novidades" section
+  - Manual configuration via `client/src/lib/featuredConfig.ts`
+  - Rich visual design with animated poster ring, gradients, and metadata
+  - Fully responsive with optimized layouts for mobile/tablet/desktop
+  - Play and More Info action buttons
+  
+- **New API Endpoint**:
+  - `GET /api/media/check/:id/:type` - Verifies if TMDB ID exists in GitHub catalogs
+  
+- **New Components**:
+  - `ContinueWatchingCard.tsx` - Specialized card for continue watching section
+  - `FeaturedBanner.tsx` - Premium featured content showcase
+  - `featuredConfig.ts` - Configuration file for monthly featured content
+
+## Recent Changes (October 2025)
+
 ### Firebase Integration Migration
 - **Date**: October 23, 2025
 - **Change**: Migrated from JSONBin to Firebase Realtime Database for unlimited access
