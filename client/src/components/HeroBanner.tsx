@@ -59,7 +59,6 @@ export function HeroBanner({ mediaItems, onPlay, onMoreInfo }: HeroBannerProps) 
             className="w-full h-full object-cover transition-opacity duration-700"
             key={currentMedia.tmdbId}
             loading="eager"
-            fetchPriority="high"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-transparent to-transparent" />

@@ -70,7 +70,7 @@ export function FeaturedBanner({
     (v) => v.type === 'Trailer' && v.site === 'YouTube'
   );
 
-  const trailerUrl = trailer ? `https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=1&controls=0&loop=1&playlist=${trailer.key}&playsinline=1&modestbranding=1&rel=0&showinfo=0` : null;
+  const trailerUrl = trailer ? `https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=0&loop=1&playlist=${trailer.key}&playsinline=1&modestbranding=1&rel=0&showinfo=0` : null;
 
   return (
     <div className="relative w-full mb-8 md:mb-12 px-4 md:px-6 lg:px-8">
@@ -86,6 +86,7 @@ export function FeaturedBanner({
           {trailerUrl && showVideo ? (
             <div className="absolute inset-0 z-0">
               <iframe
+                key={`trailer-${isMuted}`}
                 src={trailerUrl}
                 className="w-full h-full scale-150 md:scale-125"
                 allow="autoplay; encrypted-media"
