@@ -8,10 +8,10 @@ export interface ReleaseConfig {
 }
 
 export const releaseConfig: ReleaseConfig = {
-  enabled: false,
-  targetTmdbId: 0,
+  enabled: true,
+  targetTmdbId: 1175942,
   targetMediaType: 'movie',
-  targetTitle: '',
+  targetTitle: 'Os caras malvados 2',
   releaseTimestamp: Date.now() + (24 * 60 * 60 * 1000),
   backdropPath: null,
 };
