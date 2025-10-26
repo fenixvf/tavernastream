@@ -6,7 +6,36 @@ TavernaStream is a full-stack web application designed for streaming movies and 
 
 ## Recent Changes (October 2025)
 
-### Enhanced User Experience Features (October 26, 2025)
+### UX and Responsiveness Improvements (October 26, 2025 - Afternoon)
+- **Continue Watching X Button Fix**:
+  - X button now always visible on mobile devices (no hover required)
+  - Desktop maintains hover behavior for cleaner UI
+  - Improved accessibility across all devices
+  
+- **Featured Banner Redesign**:
+  - Complete redesign with poster and trailer background integration
+  - TMDB trailer API integration (`GET /api/media/videos/:id/:type`)
+  - Functional mute/unmute toggle for trailer audio
+  - Minimalist button design matching hero banner style
+  - Better responsive scaling for all screen sizes
+  
+- **Release Countdown Mobile Optimization**:
+  - Full-width layout on mobile for better visibility
+  - Improved spacing and text sizes for small screens
+  - Always visible above mobile navigation bar
+  - Enhanced touch targets for mobile interaction
+  
+- **Smart TV and Large Screen Support**:
+  - Added custom Tailwind breakpoints: `tv` (1920px), `2k` (2560px), `4k` (3840px)
+  - Dynamic font scaling for large screens (18px @ 1920px, 20px @ 2560px, 24px @ 3840px)
+  - Optimized layout and spacing for living room viewing distances
+  
+- **Performance and Code Quality**:
+  - Fixed React hook warnings in production build
+  - Removed deprecated `fetchPriority` prop causing console errors
+  - Improved trailer reload mechanism for smoother audio toggle
+
+### Enhanced User Experience Features (October 26, 2025 - Morning)
 - **Continue Watching Improvements**:
   - Replaced poster cards with 16:9 thumbnail cards showing episode/movie backdrops
   - Added X button for quick removal from continue watching list
@@ -27,12 +56,13 @@ TavernaStream is a full-stack web application designed for streaming movies and 
   - Fully responsive with optimized layouts for mobile/tablet/desktop
   - Play and More Info action buttons
   
-- **New API Endpoint**:
+- **New API Endpoints**:
   - `GET /api/media/check/:id/:type` - Verifies if TMDB ID exists in GitHub catalogs
+  - `GET /api/media/videos/:id/:type` - Fetches trailers and videos from TMDB
   
 - **New Components**:
   - `ContinueWatchingCard.tsx` - Specialized card for continue watching section
-  - `FeaturedBanner.tsx` - Premium featured content showcase
+  - `FeaturedBanner.tsx` - Premium featured content showcase with trailer support
   - `featuredConfig.ts` - Configuration file for monthly featured content
 
 ## Recent Changes (October 2025)
