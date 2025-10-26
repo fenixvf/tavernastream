@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
 import { Header } from '@/components/Header';
 import { HeroBanner } from '@/components/HeroBanner';
+import { FeaturedBanner } from '@/components/FeaturedBanner';
 import { CategoryRow } from '@/components/CategoryRow';
 import { NovidadesRow } from '@/components/NovidadesRow';
 import { MediaModal } from '@/components/MediaModal';
@@ -15,6 +16,7 @@ import { Loader2 } from 'lucide-react';
 import type { MediaItem, TMDBDetails, SeriesBinData, TMDBEpisode } from '@shared/schema';
 import { useWatchProgress } from '@/hooks/use-watch-progress';
 import { releaseConfig } from '@/lib/releaseConfig';
+import { featuredConfig } from '@/lib/featuredConfig';
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -448,6 +450,32 @@ export default function Home() {
               media={newReleases}
               onMediaClick={handleMediaClick}
               allProgress={watchProgress}
+            />
+          )}
+
+          {/* Featured of the Month */}
+          {featuredConfig.enabled && featuredConfig.tmdbId > 0 && (
+            <FeaturedBanner
+              tmdbId={featuredConfig.tmdbId}
+              mediaType={featuredConfig.mediaType}
+              title={featuredConfig.title}
+              description={featuredConfig.description}
+              onPlay={async () => {
+                const media = allMedia?.find(m => m.tmdbId === featuredConfig.tmdbId);
+                if (media) {
+                  if (media.mediaType === 'movie') {
+                    await handlePlayMovie(media);
+                  } else {
+                    handleMediaClick(media);
+                  }
+                }
+              }}
+              onMoreInfo={() => {
+                const media = allMedia?.find(m => m.tmdbId === featuredConfig.tmdbId);
+                if (media) {
+                  handleMediaClick(media);
+                }
+              }}
             />
           )}
 

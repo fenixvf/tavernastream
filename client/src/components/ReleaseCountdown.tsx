@@ -24,7 +24,7 @@ export function ReleaseCountdown({
   const [existsInCatalog, setExistsInCatalog] = useState(false);
   const [isCheckingCatalog, setIsCheckingCatalog] = useState(true);
   const [showAvailableMessage, setShowAvailableMessage] = useState(false);
-  const [autoHideTimer, setAutoHideTimer] = useState<NodeJS.Timeout | null>(null);
+  const [autoHideTimer, setAutoHideTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
