@@ -7,9 +7,9 @@ export interface FeaturedConfig {
 }
 
 export const featuredConfig: FeaturedConfig = {
-  enabled: false,
-  tmdbId: 0,
-  mediaType: 'movie',
-  title: '',
+  enabled: true ,
+  tmdbId: 66732,
+  mediaType: 'tv',
+  title: 'Stranger Things',
   description: '',
 };
