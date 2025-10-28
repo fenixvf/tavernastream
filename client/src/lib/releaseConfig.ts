@@ -18,7 +18,7 @@ export const releaseConfig: ReleaseConfig = {
       tmdbId: 1175942,
       mediaType: 'movie',
       title: 'Os caras malvados 2',
-      releaseTimestamp: Date.now() + (24 * 60 * 60 * 1000),
+      releaseTimestamp: new Date('2025-10-29T15:00:00').getTime(),
       backdropPath: null,
     },
   ],

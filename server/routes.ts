@@ -429,7 +429,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               rating: details.vote_average || 0,
               releaseDate: details.release_date || '',
               mediaType: 'movie',
-              genres: details.genres?.map((g: any) => g.id) || [],
+              genres: [-1, ...(details.genres?.map((g: any) => g.id) || [])],
               hasVideo: true,
             });
           } else if (item.mediaType === 'tv') {
@@ -444,7 +444,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               rating: details.vote_average || 0,
               releaseDate: details.first_air_date || '',
               mediaType: 'tv',
-              genres: details.genres?.map((g: any) => g.id) || [],
+              genres: [-1, ...(details.genres?.map((g: any) => g.id) || [])],
               hasVideo: true,
             });
           }
