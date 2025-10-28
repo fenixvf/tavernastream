@@ -401,50 +401,110 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Fan Dub routes - Projetos feitos por fãs
-  // Para usar: adicione os IDs no arquivo client/src/lib/fanDubConfig.ts
-  app.get("/api/fan-dub/all", async (req, res) => {
+  app.get("/api/media/fandub", async (req, res) => {
     try {
-      // O usuário configurará os IDs manualmente no fanDubConfig.ts
-      // Este endpoint retorna array vazio até que IDs sejam adicionados
-      // Exemplo de uso: importar fanDubConfig e buscar detalhes do TMDB
-      res.json([]);
+      const { fanDubConfig } = await import('../client/src/lib/fanDubConfig.js');
+      
+      if (!fanDubConfig || fanDubConfig.length === 0) {
+        return res.json([]);
+      }
+
+      const fanDubItems: MediaItem[] = [];
+
+      for (const item of fanDubConfig) {
+        try {
+          if (item.mediaType === 'movie') {
+            const [details, externalIds] = await Promise.all([
+              getMovieDetails(item.tmdbId),
+              getMovieExternalIds(item.tmdbId).catch(() => ({ imdb_id: undefined }))
+            ]);
+            
+            fanDubItems.push({
+              tmdbId: item.tmdbId,
+              imdbId: externalIds.imdb_id,
+              title: details.title || '',
+              posterPath: details.poster_path,
+              backdropPath: details.backdrop_path,
+              overview: details.overview || '',
+              rating: details.vote_average || 0,
+              releaseDate: details.release_date || '',
+              mediaType: 'movie',
+              genres: details.genres?.map((g: any) => g.id) || [],
+              hasVideo: true,
+            });
+          } else if (item.mediaType === 'tv') {
+            const details = await getTVDetails(item.tmdbId);
+            
+            fanDubItems.push({
+              tmdbId: item.tmdbId,
+              title: details.name || '',
+              posterPath: details.poster_path,
+              backdropPath: details.backdrop_path,
+              overview: details.overview || '',
+              rating: details.vote_average || 0,
+              releaseDate: details.first_air_date || '',
+              mediaType: 'tv',
+              genres: details.genres?.map((g: any) => g.id) || [],
+              hasVideo: true,
+            });
+          }
+        } catch (error) {
+          console.error(`Error fetching fandub item ${item.tmdbId}:`, error);
+        }
+      }
+
+      res.json(fanDubItems);
     } catch (error) {
-      console.error('Error fetching fan dub media:', error);
-      res.status(500).json({ error: 'Failed to fetch fan dub media' });
+      console.error('Error fetching fandub media:', error);
+      res.status(500).json({ error: 'Failed to fetch fandub media' });
     }
   });
 
-  app.get("/api/fan-dub/:id", async (req, res) => {
+  app.get("/api/fan-dub/config", async (req, res) => {
+    try {
+      res.json({
+        moviesUrl: process.env.FANDUB_MOVIES_GITHUB_URL || '',
+        seriesUrl: process.env.FANDUB_SERIES_GITHUB_URL || ''
+      });
+    } catch (error) {
+      console.error('Error fetching fan dub config:', error);
+      res.status(500).json({ error: 'Failed to fetch fan dub config' });
+    }
+  });
+
+  app.get("/api/fan-dub/:mediaType/:id/url", async (req, res) => {
     try {
       const tmdbId = parseInt(req.params.id);
+      const mediaType = req.params.mediaType as 'movie' | 'tv';
       
       if (isNaN(tmdbId)) {
         return res.status(400).json({ error: 'Invalid TMDB ID' });
       }
       
-      // Retorna detalhes de uma obra de fã dublagem específica
-      // Usuário deve adicionar os IDs no fanDubConfig.ts
-      res.status(404).json({ error: 'Fan dub item not found - configure IDs in fanDubConfig.ts' });
-    } catch (error) {
-      console.error('Error fetching fan dub item:', error);
-      res.status(500).json({ error: 'Failed to fetch fan dub item' });
-    }
-  });
+      if (mediaType !== 'movie' && mediaType !== 'tv') {
+        return res.status(400).json({ error: 'Invalid media type' });
+      }
 
-  app.get("/api/fan-dub/:id/url", async (req, res) => {
-    try {
-      const tmdbId = parseInt(req.params.id);
+      const moviesUrl = process.env.FANDUB_MOVIES_GITHUB_URL;
+      const seriesUrl = process.env.FANDUB_SERIES_GITHUB_URL;
+
+      if (!moviesUrl || !seriesUrl) {
+        return res.status(404).json({ 
+          error: 'Fandub GitHub URLs not configured. Please set FANDUB_MOVIES_GITHUB_URL and FANDUB_SERIES_GITHUB_URL environment variables' 
+        });
+      }
+
+      const { getFanDubUrl } = await import('./fandub-data.js');
+      const url = await getFanDubUrl(tmdbId, mediaType, moviesUrl, seriesUrl);
       
-      if (isNaN(tmdbId)) {
-        return res.status(400).json({ error: 'Invalid TMDB ID' });
+      if (!url) {
+        return res.status(404).json({ error: 'Fandub URL not found for this media' });
       }
       
-      // Retorna apenas a URL do Google Drive para uma obra de fã dublagem
-      // Usuário deve adicionar os IDs e URLs no fanDubConfig.ts
-      res.status(404).json({ error: 'Fan dub URL not found - configure URLs in fanDubConfig.ts' });
+      res.json({ url });
     } catch (error) {
-      console.error('Error fetching fan dub URL:', error);
-      res.status(500).json({ error: 'Failed to fetch fan dub URL' });
+      console.error('Error fetching fandub URL:', error);
+      res.status(500).json({ error: 'Failed to fetch fandub URL' });
     }
   });
 

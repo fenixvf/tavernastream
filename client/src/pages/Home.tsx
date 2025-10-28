@@ -17,6 +17,7 @@ import type { MediaItem, TMDBDetails, SeriesBinData, TMDBEpisode } from '@shared
 import { useWatchProgress } from '@/hooks/use-watch-progress';
 import { releaseConfig } from '@/lib/releaseConfig';
 import { featuredConfig } from '@/lib/featuredConfig';
+import { fanDubConfig } from '@/lib/fanDubConfig';
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -81,6 +82,14 @@ export default function Home() {
     queryKey: ['/api/media/search?q=' + encodeURIComponent(searchQuery)],
     enabled: searchQuery.length > 2 && isSearchOpen,
   });
+
+  // Fetch fandub media
+  const fanDubMediaQuery = useQuery<MediaItem[]>({
+    queryKey: ['/api/media/fandub'],
+    enabled: fanDubConfig.length > 0,
+  });
+
+  const fanDubMedia = fanDubMediaQuery.data || [];
 
   const myListIds = myList.map(item => item.tmdbId);
 
@@ -231,11 +240,25 @@ export default function Home() {
     if (!mediaToPlay) return;
     
     let driveUrl: string | undefined;
+    
+    // Verificar se é um item de fandub
+    const isFanDub = fanDubConfig.some(item => item.tmdbId === mediaToPlay.tmdbId && item.mediaType === 'movie');
+    
     try {
-      const response = await fetch(`/api/media/movie/${mediaToPlay.tmdbId}/url`);
-      if (response.ok) {
-        const data = await response.json();
-        driveUrl = data.url;
+      if (isFanDub) {
+        // Buscar URL do endpoint de fandub
+        const response = await fetch(`/api/fan-dub/movie/${mediaToPlay.tmdbId}/url`);
+        if (response.ok) {
+          const data = await response.json();
+          driveUrl = data.url;
+        }
+      } else {
+        // Buscar URL normal
+        const response = await fetch(`/api/media/movie/${mediaToPlay.tmdbId}/url`);
+        if (response.ok) {
+          const data = await response.json();
+          driveUrl = data.url;
+        }
       }
     } catch (error) {
       console.error('Error fetching movie URL:', error);
@@ -267,9 +290,29 @@ export default function Home() {
   const handlePlayEpisode = async (seasonNumber: number, episodeNumber: number, continueWatching?: boolean) => {
     if (!selectedMedia) return;
     
+    // Verificar se é um item de fandub
+    const isFanDub = fanDubConfig.some(item => item.tmdbId === selectedMedia.tmdbId && item.mediaType === 'tv');
+    
     const seasonKey = seasonNumber.toString();
     const seasonEpisodes = seriesData?.temporadas?.[seasonKey as keyof typeof seriesData.temporadas] as string[] | undefined;
-    const driveUrl = seasonEpisodes?.[episodeNumber - 1];
+    
+    let driveUrl: string | undefined;
+    
+    if (isFanDub) {
+      // Para fandub de séries, buscar URL do endpoint de fandub
+      try {
+        const response = await fetch(`/api/fan-dub/tv/${selectedMedia.tmdbId}/url`);
+        if (response.ok) {
+          const data = await response.json();
+          driveUrl = data.url;
+        }
+      } catch (error) {
+        console.error('Error fetching fandub series URL:', error);
+      }
+    } else {
+      // Buscar URL normal do seriesData
+      driveUrl = seasonEpisodes?.[episodeNumber - 1];
+    }
     
     let episodeName = `Episódio ${episodeNumber}`;
     let totalEpisodes = seasonEpisodes?.length || 1;
@@ -320,9 +363,29 @@ export default function Home() {
   const handleEpisodeChange = async (newEpisodeNumber: number) => {
     if (!playerConfig || !playerConfig.seasonNumber) return;
     
+    // Verificar se é um item de fandub
+    const isFanDub = fanDubConfig.some(item => item.tmdbId === playerConfig.tmdbId && item.mediaType === 'tv');
+    
     const seasonKey = playerConfig.seasonNumber.toString();
     const seasonEpisodes = seriesData?.temporadas?.[seasonKey as keyof typeof seriesData.temporadas] as string[] | undefined;
-    const driveUrl = seasonEpisodes?.[newEpisodeNumber - 1];
+    
+    let driveUrl: string | undefined;
+    
+    if (isFanDub) {
+      // Para fandub de séries, usar a mesma URL (pois é um único arquivo)
+      try {
+        const response = await fetch(`/api/fan-dub/tv/${playerConfig.tmdbId}/url`);
+        if (response.ok) {
+          const data = await response.json();
+          driveUrl = data.url;
+        }
+      } catch (error) {
+        console.error('Error fetching fandub series URL:', error);
+      }
+    } else {
+      // Buscar URL normal do seriesData
+      driveUrl = seasonEpisodes?.[newEpisodeNumber - 1];
+    }
     
     let episodeName = `Episódio ${newEpisodeNumber}`;
     let totalEpisodes = seasonEpisodes?.length || playerConfig.totalEpisodes || 1;
@@ -449,6 +512,19 @@ export default function Home() {
               title="Novidades"
               media={newReleases}
               onMediaClick={handleMediaClick}
+              allProgress={watchProgress}
+            />
+          )}
+
+          {/* Fã Dublagem - Projetos de fã dublagem */}
+          {fanDubMedia.length > 0 && (
+            <CategoryRow
+              key="fandub"
+              title="Fã Dublagem"
+              media={fanDubMedia}
+              onMediaClick={handleMediaClick}
+              onAddToList={handleAddToList}
+              myListIds={myListIds}
               allProgress={watchProgress}
             />
           )}

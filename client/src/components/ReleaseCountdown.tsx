@@ -18,12 +18,26 @@ export function ReleaseCountdown({
   releaseTimestamp,
   backdropPath,
 }: ReleaseCountdownProps) {
+  const releaseKey = `release_${targetTmdbId}_${targetMediaType}`;
+  
   const [isExpanded, setIsExpanded] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
-  const [isReleased, setIsReleased] = useState(false);
+  const [isReleased, setIsReleased] = useState(() => {
+    const stored = localStorage.getItem(`${releaseKey}_isReleased`);
+    return stored === 'true';
+  });
   const [existsInCatalog, setExistsInCatalog] = useState(false);
   const [isCheckingCatalog, setIsCheckingCatalog] = useState(true);
-  const [showAvailableMessage, setShowAvailableMessage] = useState(false);
+  const [showAvailableMessage, setShowAvailableMessage] = useState(() => {
+    const stored = localStorage.getItem(`${releaseKey}_showMessage`);
+    const timestamp = localStorage.getItem(`${releaseKey}_timestamp`);
+    if (stored === 'true' && timestamp) {
+      const now = Date.now();
+      const diff = now - parseInt(timestamp);
+      return diff < 5 * 60 * 1000;
+    }
+    return false;
+  });
   const [autoHideTimer, setAutoHideTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
   const { toast } = useToast();
 
@@ -57,6 +71,10 @@ export function ReleaseCountdown({
           setIsReleased(true);
           setShowAvailableMessage(true);
           
+          localStorage.setItem(`${releaseKey}_isReleased`, 'true');
+          localStorage.setItem(`${releaseKey}_showMessage`, 'true');
+          localStorage.setItem(`${releaseKey}_timestamp`, now.toString());
+          
           toast({
             title: "🎉 Novo conteúdo liberado!",
             description: `${targetTitle} já está disponível no catálogo!`,
@@ -65,6 +83,7 @@ export function ReleaseCountdown({
 
           const timer = setTimeout(() => {
             setShowAvailableMessage(false);
+            localStorage.setItem(`${releaseKey}_showMessage`, 'false');
           }, 5 * 60 * 1000);
           setAutoHideTimer(timer);
         }
@@ -84,7 +103,7 @@ export function ReleaseCountdown({
         clearTimeout(autoHideTimer);
       }
     };
-  }, [releaseTimestamp, targetTitle, isReleased, toast]);
+  }, [releaseTimestamp, targetTitle, isReleased, toast, releaseKey]);
 
   if (isReleased && !showAvailableMessage) {
     return null;
@@ -137,7 +156,10 @@ export function ReleaseCountdown({
               variant="ghost"
               size="icon"
               className="h-8 w-8 hover:bg-white/10 rounded-full flex-shrink-0"
-              onClick={() => setShowAvailableMessage(false)}
+              onClick={() => {
+                setShowAvailableMessage(false);
+                localStorage.setItem(`${releaseKey}_showMessage`, 'false');
+              }}
               data-testid="button-close-available"
             >
               <ChevronDown className="w-5 h-5" />
