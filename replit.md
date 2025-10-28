@@ -25,6 +25,9 @@ TavernaStream is a full-stack web application for streaming movies and series. I
 - Todos os componentes (Continue Watching, New Releases, Featured Banner, Browse) usam dados combinados
 - Sistema funcionando: busca metadados do TMDB e valida URLs do GitHub
 - Backend importa URLs do `fanDubConfig.ts` dinamicamente
+- **Botão de estúdio**: MediaModal detecta fandub via genre ID -1 e exibe botão Instagram do estúdio
+- **Player exclusivo**: Fandub usa apenas Player 2 (Drive), PlayerFlix não é exibido
+- **Progresso**: Sistema de progresso funciona para ambos os players (PlayerFlix e Drive)
 
 **TMDB API Key:**
 - Configurada chave de API do TMDB como secret do Replit
