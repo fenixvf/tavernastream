@@ -8,18 +8,27 @@ TavernaStream is a full-stack web application for streaming movies and series. I
 
 ### Release Countdown & Fan Dubbing System Fixes (October 28, 2025)
 
-**Cronômetro Corrigido:**
-- Resolvido problema de reset ao atualizar página
-- Estados `isReleased` e `showAvailableMessage` agora validam `releaseTimestamp` antes de carregar do localStorage
-- Removido `autoHideTimer` do estado e separado em useEffect independente
-- Timer persiste corretamente e continua contando após reload
+**Cronômetro Corrigido (ATUALIZAÇÃO FINAL):**
+- ✅ Resolvido problema definitivo de reset ao atualizar página
+- Mudado de `Date.now() + 24h` para timestamp fixo em `releaseConfig.ts`
+- Agora usa `new Date('2025-10-29T15:00:00').getTime()` como exemplo
+- Timer nunca mais reinicia, continua contando corretamente após qualquer reload
+- Estados `isReleased` e `showAvailableMessage` funcionam corretamente
+- Para adicionar novos countdowns, basta adicionar itens no array `releaseConfig.items`
 
-**Sistema de Fandub Corrigido:**
-- Configurado URLs corretas do GitHub (fenixvf/server-json)
-- Backend agora importa URLs do `fanDubConfig.ts` ao invés de variáveis de ambiente
-- Validação robusta: verifica se entry existe, se string não está vazia, detecta estruturas não suportadas
+**Sistema de Fandub Corrigido (ATUALIZAÇÃO FINAL):**
+- ✅ Integração completa com sistema de navegação e categorias
+- Itens de fandub agora recebem genre ID `-1` no backend (`/api/media/fandub`)
+- Criada categoria "Fã Dublagem" na página inicial que exibe todos os itens do `fanDubConfig`
+- Filtro "Fã Dublagem" no Browse funciona corretamente (genreIds: [-1])
+- Implementado `allMediaCombined` que mescla `allMedia` + `fanDubMedia` sem duplicatas
+- Todos os componentes (Continue Watching, New Releases, Featured Banner, Browse) usam dados combinados
 - Sistema funcionando: busca metadados do TMDB e valida URLs do GitHub
-- Logs descritivos para debugging
+- Backend importa URLs do `fanDubConfig.ts` dinamicamente
+
+**TMDB API Key:**
+- Configurada chave de API do TMDB como secret do Replit
+- Disponível como variável de ambiente `TMDB_API_KEY`
 
 ## User Preferences
 
