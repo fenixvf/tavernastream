@@ -303,13 +303,13 @@ export default function Home() {
     
     setPlayerConfig({
       tmdbId: mediaToPlay.tmdbId,
-      imdbId: mediaToPlay.imdbId,
+      imdbId: isFanDub ? undefined : mediaToPlay.imdbId,
       mediaType: 'movie',
       title: mediaToPlay.title,
       posterPath: mediaToPlay.posterPath,
       backdropPath: mediaToPlay.backdropPath,
       driveUrl,
-      autoPlayPlayerFlix: continueWatching,
+      autoPlayPlayerFlix: isFanDub ? false : continueWatching,
       resumeTime,
     });
     setIsPlayerOpen(true);
@@ -372,7 +372,7 @@ export default function Home() {
     
     setPlayerConfig({
       tmdbId: selectedMedia.tmdbId,
-      imdbId: selectedMedia.imdbId,
+      imdbId: isFanDub ? undefined : selectedMedia.imdbId,
       mediaType: 'tv',
       title: selectedMedia.title,
       seasonNumber,
@@ -382,7 +382,7 @@ export default function Home() {
       backdropPath: selectedMedia.backdropPath,
       driveUrl,
       totalEpisodes,
-      autoPlayPlayerFlix: continueWatching,
+      autoPlayPlayerFlix: isFanDub ? false : continueWatching,
       resumeTime,
     });
     setIsPlayerOpen(true);

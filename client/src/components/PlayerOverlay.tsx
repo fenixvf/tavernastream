@@ -50,14 +50,20 @@ export function PlayerOverlay({
   const { saveProgress } = useWatchProgress();
 
   // Auto-selecionar PlayerFlix quando autoPlayPlayerFlix é true
+  // OU auto-selecionar Drive quando não há IMDB ID (fandub) mas há driveUrl
   useEffect(() => {
-    if (isOpen && autoPlayPlayerFlix && !selectedPlayer) {
-      handlePlayerSelect('playerflix');
+    if (isOpen && !selectedPlayer) {
+      if (!imdbId && driveUrl) {
+        // Se não tem IMDB ID mas tem Drive URL, é fandub - usar apenas Player 2
+        handlePlayerSelect('drive');
+      } else if (autoPlayPlayerFlix) {
+        handlePlayerSelect('playerflix');
+      }
     }
-  }, [isOpen, autoPlayPlayerFlix]);
+  }, [isOpen, autoPlayPlayerFlix, imdbId, driveUrl]);
 
   const saveCurrentProgress = useCallback((forceCurrentTime?: number) => {
-    if (watchStartTime && selectedPlayer === 'playerflix') {
+    if (watchStartTime && selectedPlayer) {
       const watchDuration = Date.now() - watchStartTime;
       const watchedSeconds = watchDuration / 1000;
       
@@ -94,8 +100,8 @@ export function PlayerOverlay({
     if (playerType === 'playerflix') {
       setShowAdWarning(true);
       setTimeout(() => setShowAdWarning(false), 5000);
-      setWatchStartTime(Date.now());
     }
+    setWatchStartTime(Date.now());
     setSelectedPlayer(playerType);
   };
 
@@ -256,23 +262,25 @@ export function PlayerOverlay({
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* PlayerFlix Option - Sempre disponível */}
-                <button
-                  onClick={() => handlePlayerSelect('playerflix')}
-                  className="p-6 rounded-lg bg-card border-2 border-card-border hover:border-primary transition-all hover-elevate active-elevate-2 group"
-                  data-testid="button-player-option-1"
-                >
-                  <div className="space-y-2">
-                    <h3 className="text-xl font-bold group-hover:text-primary transition-colors">
-                      Opção 1
-                    </h3>
-                    <p className="text-sm text-muted-foreground">PlayerFlix</p>
-                    <div className="flex items-center justify-center gap-2 text-yellow-500">
-                      <AlertTriangle className="w-4 h-4" />
-                      <span className="text-xs">Contém anúncios</span>
+                {/* PlayerFlix Option - Disponível apenas se houver IMDB ID */}
+                {imdbId && (
+                  <button
+                    onClick={() => handlePlayerSelect('playerflix')}
+                    className="p-6 rounded-lg bg-card border-2 border-card-border hover:border-primary transition-all hover-elevate active-elevate-2 group"
+                    data-testid="button-player-option-1"
+                  >
+                    <div className="space-y-2">
+                      <h3 className="text-xl font-bold group-hover:text-primary transition-colors">
+                        Opção 1
+                      </h3>
+                      <p className="text-sm text-muted-foreground">PlayerFlix</p>
+                      <div className="flex items-center justify-center gap-2 text-yellow-500">
+                        <AlertTriangle className="w-4 h-4" />
+                        <span className="text-xs">Contém anúncios</span>
+                      </div>
                     </div>
-                  </div>
-                </button>
+                  </button>
+                )}
 
                 {/* Google Drive Option - Sempre visível, mas desabilitada se não houver URL */}
                 <button
@@ -282,14 +290,14 @@ export function PlayerOverlay({
                     driveUrl 
                       ? 'border-card-border hover:border-primary hover-elevate active-elevate-2 cursor-pointer' 
                       : 'border-card-border/30 cursor-not-allowed opacity-50'
-                  } group`}
+                  } group ${!imdbId && driveUrl ? 'md:col-span-2' : ''}`}
                   data-testid="button-player-option-2"
                 >
                   <div className="space-y-2">
                     <h3 className={`text-xl font-bold transition-colors ${
                       driveUrl ? 'group-hover:text-primary' : 'text-muted-foreground'
                     }`}>
-                      Opção 2
+                      {!imdbId && driveUrl ? 'Player Google Drive' : 'Opção 2'}
                     </h3>
                     <p className="text-sm text-muted-foreground">
                       {driveUrl ? 'Sem Anúncios' : 'Indisponível'}

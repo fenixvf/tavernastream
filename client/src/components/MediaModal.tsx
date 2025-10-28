@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { X, Play, Heart, Check } from 'lucide-react';
+import { X, Play, Heart, Check, Instagram } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { TMDBDetails, TMDBEpisode, SeriesBinData } from '@shared/schema';
 import { useWatchProgress } from '@/hooks/use-watch-progress';
+import { fanDubConfig } from '@/lib/fanDubConfig';
 
 interface MediaModalProps {
   isOpen: boolean;
@@ -49,6 +50,12 @@ export function MediaModal({
     : details?.first_air_date
     ? new Date(details.first_air_date).getFullYear()
     : '';
+
+  // Check if this is a fandub item
+  const isFanDub = details?.genres?.some(g => g.id === -1) || false;
+  const fanDubInfo = isFanDub ? fanDubConfig.find(
+    item => item.tmdbId === details?.id && item.mediaType === mediaType
+  ) : null;
 
   if (!details) {
     return null;
@@ -143,6 +150,19 @@ export function MediaModal({
               <span className="hidden xs:inline">{isInList ? 'Na Minha Lista' : 'Adicionar à Lista'}</span>
               <span className="xs:hidden">{isInList ? 'Na Lista' : 'Adicionar'}</span>
             </Button>
+            {isFanDub && fanDubInfo && (
+              <Button
+                size="lg"
+                variant="outline"
+                className="gap-2 text-sm sm:text-base bg-gradient-to-r from-orange-500/10 to-red-500/10 border-orange-500/30 hover:border-orange-500/50"
+                onClick={() => window.open(fanDubInfo.studioSocialUrl, '_blank')}
+                data-testid="button-modal-studio"
+              >
+                <Instagram className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="hidden xs:inline">{fanDubInfo.studioName}</span>
+                <span className="xs:hidden">Estúdio</span>
+              </Button>
+            )}
           </div>
 
           {/* Episodes (Series Only) */}
