@@ -4,6 +4,23 @@
 
 TavernaStream is a full-stack web application for streaming movies and series. It integrates data from The Movie Database (TMDB) with video URLs stored in Firebase Realtime Database. The platform offers a rich media catalog, a versatile video player, progress tracking, "New Releases," user-specific watchlists, and real-time search, all within a responsive UI. The project aims to deliver a seamless and engaging streaming service, including unique features like an automatic fan dubbing system and persistent release countdowns.
 
+## Recent Changes
+
+### Release Countdown & Fan Dubbing System Fixes (October 28, 2025)
+
+**Cronômetro Corrigido:**
+- Resolvido problema de reset ao atualizar página
+- Estados `isReleased` e `showAvailableMessage` agora validam `releaseTimestamp` antes de carregar do localStorage
+- Removido `autoHideTimer` do estado e separado em useEffect independente
+- Timer persiste corretamente e continua contando após reload
+
+**Sistema de Fandub Corrigido:**
+- Configurado URLs corretas do GitHub (fenixvf/server-json)
+- Backend agora importa URLs do `fanDubConfig.ts` ao invés de variáveis de ambiente
+- Validação robusta: verifica se entry existe, se string não está vazia, detecta estruturas não suportadas
+- Sistema funcionando: busca metadados do TMDB e valida URLs do GitHub
+- Logs descritivos para debugging
+
 ## User Preferences
 
 I prefer detailed explanations and an iterative development approach. Please ask before making major changes.
