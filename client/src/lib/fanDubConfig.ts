@@ -32,14 +32,14 @@ export const fanDubConfig: FanDubItem[] = [
   // },
 
   {
-    tmdbId: 12345,
+    tmdbId: 119495,
     mediaType: 'tv',
-    studioName: 'Estúdio Fã Dubladores',
-    studioSocialUrl: 'https://instagram.com/estudiofans'
+    studioName: 'WallyDubs',
+    studioSocialUrl: 'https://instagram.com/wallydubsoficial'
   }
 ];
 
 // URLs dos repositórios do GitHub com os links de fandub
 // Estes arquivos devem ter a estrutura: { "tmdbId": "url_do_drive", ... }
-export const FANDUB_MOVIES_GITHUB_URL = 'https://raw.githubusercontent.com/SEU_USUARIO/SEU_REPO/main/filmes.json';
-export const FANDUB_SERIES_GITHUB_URL = 'https://raw.githubusercontent.com/SEU_USUARIO/SEU_REPO/main/series.json';
+export const FANDUB_MOVIES_GITHUB_URL = 'https://raw.githubusercontent.com/fenixvf/server-json/refs/heads/main/filmes-series-tavernastream-default-rtdb-export.json';
+export const FANDUB_SERIES_GITHUB_URL = 'https://raw.githubusercontent.com/fenixvf/server-json/refs/heads/main/series-tavernastream-default-rtdb-export.json';

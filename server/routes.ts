@@ -485,17 +485,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Invalid media type' });
       }
 
-      const moviesUrl = process.env.FANDUB_MOVIES_GITHUB_URL;
-      const seriesUrl = process.env.FANDUB_SERIES_GITHUB_URL;
+      const { FANDUB_MOVIES_GITHUB_URL, FANDUB_SERIES_GITHUB_URL } = await import('../client/src/lib/fanDubConfig.js');
 
-      if (!moviesUrl || !seriesUrl) {
+      if (!FANDUB_MOVIES_GITHUB_URL || !FANDUB_SERIES_GITHUB_URL) {
         return res.status(404).json({ 
-          error: 'Fandub GitHub URLs not configured. Please set FANDUB_MOVIES_GITHUB_URL and FANDUB_SERIES_GITHUB_URL environment variables' 
+          error: 'Fandub GitHub URLs not configured in fanDubConfig.ts' 
         });
       }
 
       const { getFanDubUrl } = await import('./fandub-data.js');
-      const url = await getFanDubUrl(tmdbId, mediaType, moviesUrl, seriesUrl);
+      const url = await getFanDubUrl(tmdbId, mediaType, FANDUB_MOVIES_GITHUB_URL, FANDUB_SERIES_GITHUB_URL);
       
       if (!url) {
         return res.status(404).json({ error: 'Fandub URL not found for this media' });

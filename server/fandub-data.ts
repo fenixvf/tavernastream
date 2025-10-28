@@ -101,7 +101,28 @@ export async function getFanDubUrl(
       ? await getFanDubMovies(moviesGithubUrl)
       : await getFanDubSeries(seriesGithubUrl);
     
-    return data[tmdbId.toString()] || null;
+    const entry = data[tmdbId.toString()];
+    
+    if (!entry) {
+      console.log(`[FanDub] No entry found for ${mediaType} ${tmdbId}`);
+      return null;
+    }
+    
+    if (typeof entry === 'string') {
+      if (!entry || entry.trim() === '') {
+        console.log(`[FanDub] Empty URL for ${mediaType} ${tmdbId}`);
+        return null;
+      }
+      return entry;
+    }
+    
+    if (typeof entry === 'object' && (entry as any).temporadas) {
+      console.log(`[FanDub] ${mediaType} ${tmdbId} uses temporadas structure, not supported for single URL playback`);
+      return null;
+    }
+    
+    console.log(`[FanDub] Invalid format for ${mediaType} ${tmdbId}:`, typeof entry);
+    return null;
   } catch (error) {
     console.error(`Error fetching fandub URL for ${mediaType} ${tmdbId}:`, error);
     return null;

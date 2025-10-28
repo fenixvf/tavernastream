@@ -23,22 +23,34 @@ export function ReleaseCountdown({
   const [isExpanded, setIsExpanded] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
   const [isReleased, setIsReleased] = useState(() => {
-    const stored = localStorage.getItem(`${releaseKey}_isReleased`);
-    return stored === 'true';
+    const now = Date.now();
+    const hasReleased = releaseTimestamp <= now;
+    
+    if (hasReleased) {
+      const stored = localStorage.getItem(`${releaseKey}_isReleased`);
+      return stored === 'true';
+    }
+    
+    return false;
   });
   const [existsInCatalog, setExistsInCatalog] = useState(false);
   const [isCheckingCatalog, setIsCheckingCatalog] = useState(true);
   const [showAvailableMessage, setShowAvailableMessage] = useState(() => {
+    const now = Date.now();
+    const hasReleased = releaseTimestamp <= now;
+    
+    if (!hasReleased) {
+      return false;
+    }
+    
     const stored = localStorage.getItem(`${releaseKey}_showMessage`);
     const timestamp = localStorage.getItem(`${releaseKey}_timestamp`);
     if (stored === 'true' && timestamp) {
-      const now = Date.now();
       const diff = now - parseInt(timestamp);
       return diff < 5 * 60 * 1000;
     }
     return false;
   });
-  const [autoHideTimer, setAutoHideTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -80,12 +92,6 @@ export function ReleaseCountdown({
             description: `${targetTitle} já está disponível no catálogo!`,
             duration: 10000,
           });
-
-          const timer = setTimeout(() => {
-            setShowAvailableMessage(false);
-            localStorage.setItem(`${releaseKey}_showMessage`, 'false');
-          }, 5 * 60 * 1000);
-          setAutoHideTimer(timer);
         }
         setTimeRemaining(0);
         return;
@@ -99,11 +105,19 @@ export function ReleaseCountdown({
 
     return () => {
       clearInterval(interval);
-      if (autoHideTimer) {
-        clearTimeout(autoHideTimer);
-      }
     };
   }, [releaseTimestamp, targetTitle, isReleased, toast, releaseKey]);
+  
+  useEffect(() => {
+    if (showAvailableMessage) {
+      const timer = setTimeout(() => {
+        setShowAvailableMessage(false);
+        localStorage.setItem(`${releaseKey}_showMessage`, 'false');
+      }, 5 * 60 * 1000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [showAvailableMessage, releaseKey]);
 
   if (isReleased && !showAvailableMessage) {
     return null;
