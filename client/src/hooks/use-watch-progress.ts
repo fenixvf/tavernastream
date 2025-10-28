@@ -32,8 +32,8 @@ export function useWatchProgress() {
         }
       });
 
-      // Marcar como completo se progress >= 90%
-      const isCompleted = progress.progress >= 90 || progress.completed;
+      // Marcar como completo se progress >= 80%
+      const isCompleted = progress.progress >= 80 || progress.completed;
 
       const newProgress: WatchProgress = {
         ...progress,

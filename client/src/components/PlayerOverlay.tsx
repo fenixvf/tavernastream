@@ -69,7 +69,7 @@ export function PlayerOverlay({
         // Estimar duração total baseado no tipo de mídia
         const estimatedDuration = mediaType === 'movie' ? 7200 : 2400; // 2h para filmes, 40min para episódios
         const progressPercent = Math.min(95, (currentTime / estimatedDuration) * 100);
-        const isCompleted = progressPercent >= 90;
+        const isCompleted = progressPercent >= 80;
         
         saveProgress({
           tmdbId,

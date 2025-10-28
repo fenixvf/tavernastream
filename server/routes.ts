@@ -400,6 +400,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Fan Dub routes - Projetos feitos por fãs
+  // Para usar: adicione os IDs no arquivo client/src/lib/fanDubConfig.ts
+  app.get("/api/fan-dub/all", async (req, res) => {
+    try {
+      // O usuário configurará os IDs manualmente no fanDubConfig.ts
+      // Este endpoint retorna array vazio até que IDs sejam adicionados
+      // Exemplo de uso: importar fanDubConfig e buscar detalhes do TMDB
+      res.json([]);
+    } catch (error) {
+      console.error('Error fetching fan dub media:', error);
+      res.status(500).json({ error: 'Failed to fetch fan dub media' });
+    }
+  });
+
+  app.get("/api/fan-dub/:id", async (req, res) => {
+    try {
+      const tmdbId = parseInt(req.params.id);
+      
+      if (isNaN(tmdbId)) {
+        return res.status(400).json({ error: 'Invalid TMDB ID' });
+      }
+      
+      // Retorna detalhes de uma obra de fã dublagem específica
+      // Usuário deve adicionar os IDs no fanDubConfig.ts
+      res.status(404).json({ error: 'Fan dub item not found - configure IDs in fanDubConfig.ts' });
+    } catch (error) {
+      console.error('Error fetching fan dub item:', error);
+      res.status(500).json({ error: 'Failed to fetch fan dub item' });
+    }
+  });
+
+  app.get("/api/fan-dub/:id/url", async (req, res) => {
+    try {
+      const tmdbId = parseInt(req.params.id);
+      
+      if (isNaN(tmdbId)) {
+        return res.status(400).json({ error: 'Invalid TMDB ID' });
+      }
+      
+      // Retorna apenas a URL do Google Drive para uma obra de fã dublagem
+      // Usuário deve adicionar os IDs e URLs no fanDubConfig.ts
+      res.status(404).json({ error: 'Fan dub URL not found - configure URLs in fanDubConfig.ts' });
+    } catch (error) {
+      console.error('Error fetching fan dub URL:', error);
+      res.status(500).json({ error: 'Failed to fetch fan dub URL' });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;

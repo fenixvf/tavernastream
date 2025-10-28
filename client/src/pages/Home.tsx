@@ -559,16 +559,17 @@ export default function Home() {
         onTabChange={setMobileTab}
       />
 
-      {/* Release Countdown */}
-      {releaseConfig.enabled && (
+      {/* Release Countdown - Suporte para múltiplos itens */}
+      {releaseConfig.enabled && releaseConfig.items.length > 0 && releaseConfig.items.map((item) => (
         <ReleaseCountdown
-          targetTmdbId={releaseConfig.targetTmdbId}
-          targetMediaType={releaseConfig.targetMediaType}
-          targetTitle={releaseConfig.targetTitle}
-          releaseTimestamp={releaseConfig.releaseTimestamp}
-          backdropPath={releaseConfig.backdropPath}
+          key={`${item.tmdbId}-${item.mediaType}`}
+          targetTmdbId={item.tmdbId}
+          targetMediaType={item.mediaType}
+          targetTitle={item.title}
+          releaseTimestamp={item.releaseTimestamp}
+          backdropPath={item.backdropPath}
         />
-      )}
+      ))}
     </div>
   );
 }

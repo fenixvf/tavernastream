@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Loader2, Film, Tv, Swords, Laugh, Ghost, Heart, Drama, Sparkles, Rocket, Eye } from 'lucide-react';
+import { X, Loader2, Film, Tv, Swords, Laugh, Ghost, Heart, Drama, Sparkles, Rocket, Eye, Mic } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MediaCard } from './MediaCard';
 import { CategoryRow } from './CategoryRow';
@@ -40,6 +40,7 @@ export function BrowseOverlay({
 
   const genreButtons: GenreButton[] = [
     { id: 'all', label: 'Todos', icon: Sparkles, genreIds: [], color: 'from-purple-500 to-pink-500' },
+    { id: 'fandub', label: 'Fã Dublagem', icon: Mic, genreIds: [-1], color: 'from-orange-500 to-red-500' },
     { id: 'anime', label: 'Animes', icon: Tv, genreIds: [16], color: 'from-blue-500 to-cyan-500' },
     { id: 'action', label: 'Ação', icon: Swords, genreIds: [28, 10759], color: 'from-red-500 to-orange-500' },
     { id: 'comedy', label: 'Comédia', icon: Laugh, genreIds: [35], color: 'from-yellow-500 to-amber-500' },
