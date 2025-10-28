@@ -30,6 +30,13 @@ export const fanDubConfig: FanDubItem[] = [
   //   studioName: 'Estúdio Fã Dubladores',
   //   studioSocialUrl: 'https://instagram.com/estudiofans',
   // },
+
+  {
+    tmdbId: 12345,
+    mediaType: 'tv',
+    studioName: 'Estúdio Fã Dubladores',
+    studioSocialUrl: 'https://instagram.com/estudiofans'
+  }
 ];
 
 // URLs dos repositórios do GitHub com os links de fandub
