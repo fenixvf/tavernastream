@@ -6,6 +6,30 @@ TavernaStream is a full-stack web application designed for streaming movies and 
 
 ## Recent Changes (October 2025)
 
+### Featured Banner & Watch Progress Updates (October 28, 2025)
+- **Trailer Removal from Featured Banner**:
+  - Removed all trailer functionality to keep banner simpler
+  - Now displays only poster and backdrop images
+  - Cleaner, faster loading experience
+  
+- **Watch Progress Adjustment**:
+  - Changed completion threshold from 90% to 80%
+  - Content marked as "watched" when reaching 80% of runtime
+  - Applied consistently across PlayerOverlay and useWatchProgress hook
+  
+- **Fan Dubbing System**:
+  - Created `fanDubConfig.ts` for easy manual configuration of fan-dubbed content
+  - Added "Fã Dublagem" category in browse overlay with microphone icon
+  - Backend routes prepared for future integration (currently return empty until IDs are configured)
+  - Supports TMDB IDs, Google Drive URLs, and studio information
+  - Simple structure: add TMDB ID + Drive URL + studio info to display content
+  
+- **Multiple Countdown Support**:
+  - Release countdown now supports blocking multiple content items simultaneously
+  - `releaseConfig.items` is now an array instead of single item
+  - Each item can have different release times and content
+  - Added safety check to prevent rendering issues with empty arrays
+
 ### UX and Responsiveness Improvements (October 26, 2025 - Afternoon)
 - **Continue Watching X Button Fix**:
   - X button now always visible on mobile devices (no hover required)
