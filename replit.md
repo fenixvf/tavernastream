@@ -2,138 +2,7 @@
 
 ## Overview
 
-TavernaStream is a full-stack web application designed for streaming movies and series. It integrates data from The Movie Database (TMDB) with video URLs stored in Firebase Realtime Database, providing a comprehensive streaming experience. The platform features a rich media catalog, a versatile video player, progress tracking, a "New Releases" section, user-specific watchlists, and real-time search capabilities, all presented through a responsive user interface. The project aims to deliver a seamless and engaging streaming service.
-
-## Recent Changes (October 2025)
-
-### Featured Banner & Watch Progress Updates (October 28, 2025)
-- **Trailer Removal from Featured Banner**:
-  - Removed all trailer functionality to keep banner simpler
-  - Now displays only poster and backdrop images
-  - Cleaner, faster loading experience
-  
-- **Watch Progress Adjustment**:
-  - Changed completion threshold from 90% to 80%
-  - Content marked as "watched" when reaching 80% of runtime
-  - Applied consistently across PlayerOverlay and useWatchProgress hook
-  
-- **Fan Dubbing System**:
-  - Created `fanDubConfig.ts` for easy manual configuration of fan-dubbed content
-  - Added "Fã Dublagem" category in browse overlay with microphone icon
-  - Backend routes prepared for future integration (currently return empty until IDs are configured)
-  - Supports TMDB IDs, Google Drive URLs, and studio information
-  - Simple structure: add TMDB ID + Drive URL + studio info to display content
-  
-- **Multiple Countdown Support**:
-  - Release countdown now supports blocking multiple content items simultaneously
-  - `releaseConfig.items` is now an array instead of single item
-  - Each item can have different release times and content
-  - Added safety check to prevent rendering issues with empty arrays
-
-### UX and Responsiveness Improvements (October 26, 2025 - Afternoon)
-- **Continue Watching X Button Fix**:
-  - X button now always visible on mobile devices (no hover required)
-  - Desktop maintains hover behavior for cleaner UI
-  - Improved accessibility across all devices
-  
-- **Featured Banner Complete Redesign (Netflix-style)**:
-  - **Click-to-Play Interaction**: Trailer hidden by default, appears only when user clicks on poster
-  - **Netflix Animation**: Smooth transition with poster sliding left and trailer appearing right
-  - **Auto-fetch Latest Trailer**: Automatically uses the most recent video from TMDB API
-  - **No Mute Button**: Cleaner interface, trailer plays muted by default when expanded
-  - **100% Responsive**: Fully adaptive layout without overlapping elements on all screen sizes
-  - **Framer Motion**: Smooth, professional animations for expand/collapse transitions
-  - **Minimalist Design**: Clean buttons matching hero banner style throughout
-  
-- **Release Countdown Mobile Optimization**:
-  - Full-width layout on mobile for better visibility
-  - Improved spacing and text sizes for small screens
-  - Always visible above mobile navigation bar
-  - Enhanced touch targets for mobile interaction
-  
-- **Smart TV and Large Screen Support**:
-  - Added custom Tailwind breakpoints: `tv` (1920px), `2k` (2560px), `4k` (3840px)
-  - Dynamic font scaling for large screens (18px @ 1920px, 20px @ 2560px, 24px @ 3840px)
-  - Optimized layout and spacing for living room viewing distances
-  
-- **Performance and Code Quality**:
-  - Fixed React hook warnings in production build
-  - Removed deprecated `fetchPriority` prop causing console errors
-  - Improved trailer reload mechanism for smoother audio toggle
-
-### Enhanced User Experience Features (October 26, 2025 - Morning)
-- **Continue Watching Improvements**:
-  - Replaced poster cards with 16:9 thumbnail cards showing episode/movie backdrops
-  - Added X button for quick removal from continue watching list
-  - Enhanced episode information display (Season:Episode - Name)
-  - Improved visual feedback with progress bars and hover effects
-  
-- **Release Countdown Enhancement**:
-  - Added semi-transparent backdrop banner showing the upcoming content
-  - Implemented real-time catalog verification (checks GitHub every 30s)
-  - Content access blocking until release time if not in catalog
-  - "Available Now!" message with 5-minute auto-hide after release
-  - Visual lock indicator when content is blocked
-  
-- **Featured Content Banner ("Destaque do Mês")**:
-  - New premium-quality banner component below "Novidades" section
-  - Manual configuration via `client/src/lib/featuredConfig.ts`
-  - Rich visual design with animated poster ring, gradients, and metadata
-  - Fully responsive with optimized layouts for mobile/tablet/desktop
-  - Play and More Info action buttons
-  
-- **New API Endpoints**:
-  - `GET /api/media/check/:id/:type` - Verifies if TMDB ID exists in GitHub catalogs
-  - `GET /api/media/videos/:id/:type` - Fetches trailers and videos from TMDB
-  
-- **New Components**:
-  - `ContinueWatchingCard.tsx` - Specialized card for continue watching section
-  - `FeaturedBanner.tsx` - Premium featured content showcase with trailer support
-  - `featuredConfig.ts` - Configuration file for monthly featured content
-
-## Recent Changes (October 2025)
-
-### Firebase Integration Migration
-- **Date**: October 23, 2025
-- **Change**: Migrated from JSONBin to Firebase Realtime Database for unlimited access
-- **Implementation**:
-  - Created `server/firebase.ts` to replace `server/jsonbin.ts`
-  - Uses two separate Firebase databases:
-    - Movies Database: `filmes-series-tavernastream`
-    - Series Database: `series-tavernastream`
-  - Real-time cache invalidation using Firebase `onValue` listeners
-  - 30-second cache TTL for optimal performance
-  - Hero banner updated to show 5 most recent items (instead of 4)
-
-### UI & UX Improvements (October 24, 2025)
-- **PlayerOverlay Enhancement**: PlayerFlix is now always shown as Option 1, even when Google Drive URLs are unavailable
-- **Mobile Navigation Fix**: My List page now correctly handles search and browse button clicks
-- **Mobile Search Improvement**: Added dedicated input field in SearchOverlay with autofocus for better mobile experience
-- **Continue Watching Details**: Now displays episode information (T1:E2 - Episode Name) or movie timestamps where playback stopped
-- **Content Ordering**: Firebase IDs are now reversed to show most recent content first (via `.reverse()` on getAllMovieIds and getAllSeriesIds)
-- **Watch Button Always Available**: Movie "Assistir" button now appears regardless of Drive URL availability (always offers PlayerFlix option)
-- **Novidades Section Balance**: Shows balanced mix of 5 recent movies and 5 recent series, intercalated for variety
-- **Hero Banner Update**: Displays the most recent additions from Firebase (3 movies + 2 series)
-- **Release Countdown Enhancement**: Improved visual design with:
-  - Gradient backgrounds with blur effects
-  - Animated pulse indicator on clock icon
-  - Better responsive sizing for desktop (w-96) and mobile
-  - Enhanced expanded view with larger countdown display
-  - Added seconds counter in the detailed breakdown
-  - Improved border styles and shadows for premium feel
-
-### Quick Removal Buttons (October 25, 2025)
-- **X Button Position**: X button positioned at top-left corner of cards for quick removal
-- **Continue Watching X Button**: Removes individual items from "Continue Assistindo" without reopening the modal
-- **My List X Button**: Quick removal of content from the watchlist on "Minha Lista" page
-- **Mobile & Desktop Support**: X button is always visible on mobile devices; appears on hover for desktop users
-- **Consistent UX**: Both removal buttons share the same visual design and behavior (red accent on hover)
-- **Smart Button Positioning**: Heart button dynamically adjusts position to avoid overlap when X button is present
-
-### Category Navigation (October 25, 2025)
-- **"Ver Mais" Button**: Added to all category headers (Filmes, Séries, genres, etc.)
-- **Quick Access**: Clicking "Ver Mais" opens the Browse overlay for easier content exploration
-- **Improved Discovery**: Users can quickly browse full categories without scrolling through all content
+TavernaStream is a full-stack web application for streaming movies and series. It integrates data from The Movie Database (TMDB) with video URLs stored in Firebase Realtime Database. The platform offers a rich media catalog, a versatile video player, progress tracking, "New Releases," user-specific watchlists, and real-time search, all within a responsive UI. The project aims to deliver a seamless and engaging streaming service, including unique features like an automatic fan dubbing system and persistent release countdowns.
 
 ## User Preferences
 
@@ -141,84 +10,60 @@ I prefer detailed explanations and an iterative development approach. Please ask
 
 ## System Architecture
 
-The application is built with a clear separation between frontend and backend.
+The application employs a clear separation between frontend and backend components.
 
 ### Frontend
-- **Framework**: React 18 with TypeScript.
-- **Build Tool**: Vite.
-- **Styling**: Tailwind CSS for utility-first styling, complemented by Radix UI for accessible and unstyled components (e.g., Dialog, Tabs).
+- **Framework**: React 18 with TypeScript, built using Vite.
+- **Styling**: Tailwind CSS for utility-first styling and Radix UI for accessible components.
 - **Routing**: Wouter for lightweight client-side routing.
-- **State Management & Data Fetching**: TanStack Query (React Query) for efficient data caching, synchronization, and server state management.
-- **UI/UX Decisions**: Mobile-first design philosophy, responsive layouts, 16:9 aspect ratio for the video player, and adaptive navigation. Visual elements include dynamic hero banners, categorized media rows, and visual progress indicators for watched content.
+- **State Management & Data Fetching**: TanStack Query (React Query) for data caching and server state management.
+- **UI/UX Decisions**:
+    - Mobile-first design with responsive layouts.
+    - 16:9 aspect ratio for the video player.
+    - Dynamic hero banners, categorized media rows, and visual progress indicators.
+    - Featured Banner redesign inspired by Netflix, with click-to-play trailer interaction and Framer Motion for smooth animations.
+    - Optimized for various screen sizes, including custom Tailwind breakpoints for Smart TV, 2k, and 4k displays with dynamic font scaling.
+    - Persistent release countdown with local storage for state management.
+    - Dedicated "Fã Dublagem" category on the home page.
+    - Improved "Continue Watching" section with 16:9 thumbnails and quick removal options.
 
 ### Backend
-- **Framework**: Express.js with TypeScript, running on Node.js using `tsx` for execution.
+- **Framework**: Express.js with TypeScript, running on Node.js using `tsx`.
 - **External API Integration**: Primarily TMDB API for media metadata.
 - **Data Storage**:
-    - PostgreSQL (Neon) for user-specific data like "My List."
-    - **Firebase Realtime Database** for storing video URLs with real-time updates:
-      - Movies: Structured as `catalogo-filmes-tavernastream/filmes/{TMDB_ID}` -> Drive URL
-      - Series: Structured as `{TMDB_ID}/temporadas/{season_number}` -> Array of episode URLs
-      - Intelligent caching system with 30-second TTL
-      - Real-time cache invalidation on database updates
-      - No access limits unlike JSONBin
-    - In-memory storage for development purposes.
+    - PostgreSQL (Neon) for user-specific data ("My List").
+    - Firebase Realtime Database for video URLs with real-time updates and an intelligent caching system (30-second TTL). Uses separate databases for movies and series.
+- **API Endpoints**:
+    - `GET /api/media/fandub`: Fetches all fan dub metadata.
+    - `GET /api/fan-dub/movie/:id/url`: Fetches movie Drive URL from GitHub.
+    - `GET /api/fan-dub/tv/:id/url`: Fetches series Drive URL from GitHub.
+    - `GET /api/media/check/:id/:type`: Verifies content existence in GitHub catalogs.
+    - `GET /api/media/videos/:id/:type`: Fetches trailers and videos from TMDB.
 
 ### Core Features
-- **Media Catalog**: Displays movies and series, categorized by genre, with automatic updates and TMDB metadata.
-- **Video Player**: Supports two options: PlayerFlix (with ads, using IMDB ID for movies and TMDB ID for series) and direct Google Drive URLs (ad-free). Includes responsive design, episode navigation, and player switching.
-- **Continue Watching**: Tracks viewing progress (PlayerFlix only), stores history in localStorage, and allows users to resume playback.
-- **New Releases**: Highlights recently added content from Firebase, updated automatically in real-time.
+- **Media Catalog**: Displays movies and series with TMDB metadata, categorized by genre.
+- **Video Player**: Supports PlayerFlix (with ads) and direct Google Drive URLs (ad-free), with responsive design and episode navigation.
+- **Continue Watching**: Tracks viewing progress (completion threshold at 80%), stored in localStorage, with quick removal functionality.
+- **New Releases**: Highlights recently added content from Firebase.
 - **My List**: Allows users to add/remove media, persisted in PostgreSQL.
-- **Search**: Real-time search integrated with TMDB Search API, filtered by availability in Firebase.
-- **Responsiveness**: Fully adaptive interface for various devices, including episode thumbnails from TMDB.
+- **Search**: Real-time search using TMDB API, filtered by content availability in Firebase.
+- **Automatic Fan Dubbing System**: Integrates with GitHub to fetch Drive URLs for fan-dubbed content, supporting seamless playback.
+- **Release Countdown**: Displays upcoming content, blocks access until release time, and provides "Available Now!" messaging.
+- **Featured Content Banner**: Premium-quality banner below "Novidades" for manually configured featured items.
 
 ### System Design Choices
-- **Firebase Real-time Updates**: Implements automatic cache invalidation when database content changes, ensuring users always see the latest content without manual refresh.
-- **Shared State Architecture**: `useWatchProgress` hook is elevated to parent components (Home, MyListPage) to ensure progress state is consistently shared and updated across all `MediaCard` instances, improving data consistency and reducing redundant fetches.
-- **Dynamic Content Ordering**: Catalog display prioritizes recently added items by inverting the order within each Firebase database.
-- **Rotating Hero Banner**: Displays up to five recent items (movies and series) with automatic rotation, manual navigation, and smooth transitions.
+- **Firebase Real-time Updates**: Automatic cache invalidation on database changes ensures up-to-date content.
+- **Shared State Architecture**: `useWatchProgress` hook ensures consistent progress state across components.
+- **Dynamic Content Ordering**: Catalog and hero banner prioritize recently added items.
+- **Rotating Hero Banner**: Displays up to five recent items with navigation and smooth transitions.
 
 ## External Dependencies
 
-- **TMDB API**: Used for fetching comprehensive movie and series metadata, including titles, synopses, posters, external IDs (like IMDB), and search capabilities.
-- **Firebase Realtime Database**: Serves as the primary storage for actual video URLs for both movies and series, with real-time synchronization capabilities.
-- **PlayerFlix API**:
+- **TMDB API**: Fetches movie and series metadata, including titles, synopses, posters, and external IDs.
+- **Firebase Realtime Database**: Stores and synchronizes video URLs for movies and series.
+- **PlayerFlix API**: Provides movie and series playback options.
     - Movie Playback: `https://playerflixapi.com/filme/{imdb_id}`
     - Series Playback: `https://playerflixapi.com/serie/{tmdb_id}/{season}/{episode}`
-- **PostgreSQL (Neon)**: Utilized for persistent storage of user-specific data, specifically the "My List" feature.
-- **Google Drive**: Supports direct Google Drive URLs for ad-free video playback.
-
-## Environment Variables
-
-All sensitive credentials are stored securely in Replit Secrets:
-
-### Firebase Movies Database
-- FIREBASE_MOVIES_API_KEY
-- FIREBASE_MOVIES_AUTH_DOMAIN
-- FIREBASE_MOVIES_DATABASE_URL
-- FIREBASE_MOVIES_PROJECT_ID
-- FIREBASE_MOVIES_STORAGE_BUCKET
-- FIREBASE_MOVIES_MESSAGING_SENDER_ID
-- FIREBASE_MOVIES_APP_ID
-- FIREBASE_MOVIES_MEASUREMENT_ID
-
-### Firebase Series Database
-- FIREBASE_SERIES_API_KEY
-- FIREBASE_SERIES_AUTH_DOMAIN
-- FIREBASE_SERIES_DATABASE_URL
-- FIREBASE_SERIES_PROJECT_ID
-- FIREBASE_SERIES_STORAGE_BUCKET
-- FIREBASE_SERIES_MESSAGING_SENDER_ID
-- FIREBASE_SERIES_APP_ID
-- FIREBASE_SERIES_MEASUREMENT_ID
-
-### TMDB API
-- TMDB_API_KEY
-
-## Deployment
-
-The application is configured for Replit deployment with autoscale:
-- Build: `npm run build`
-- Start: `npm start`
-- Development: `npm run dev` (port 5000)
+- **PostgreSQL (Neon)**: Persists user-specific data for the "My List" feature.
+- **Google Drive**: Supports direct URLs for ad-free video playback.
+- **GitHub**: Used by the automatic fan dubbing system to fetch Drive URLs.
