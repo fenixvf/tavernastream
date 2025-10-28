@@ -91,23 +91,46 @@ export default function Home() {
 
   const fanDubMedia = fanDubMediaQuery.data || [];
 
+  // Merge fandub media with all media, avoiding duplicates
+  const allMediaCombined = (() => {
+    if (!allMedia) return fanDubMedia;
+    if (fanDubMedia.length === 0) return allMedia;
+    
+    const combined = [...allMedia];
+    const existingIds = new Set(allMedia.map(m => m.tmdbId));
+    
+    fanDubMedia.forEach(fandubItem => {
+      if (!existingIds.has(fandubItem.tmdbId)) {
+        combined.push(fandubItem);
+      } else {
+        // Replace existing item with fandub version (which has the -1 genre)
+        const index = combined.findIndex(m => m.tmdbId === fandubItem.tmdbId);
+        if (index !== -1) {
+          combined[index] = fandubItem;
+        }
+      }
+    });
+    
+    return combined;
+  })();
+
   const myListIds = myList.map(item => item.tmdbId);
 
   // Get continue watching items
   const continueWatchingData = getContinueWatching();
   const continueWatching = continueWatchingData
     .map(progress => {
-      const media = allMedia?.find(m => m.tmdbId === progress.tmdbId);
+      const media = allMediaCombined?.find(m => m.tmdbId === progress.tmdbId);
       return media;
     })
     .filter(Boolean) as MediaItem[];
 
   // Get new releases - balanceado entre filmes e séries (5 de cada)
   const newReleases = (() => {
-    if (!allMedia) return [];
+    if (!allMediaCombined) return [];
     
-    const recentMovies = allMedia.filter(m => m.mediaType === 'movie').slice(0, 5);
-    const recentSeries = allMedia.filter(m => m.mediaType === 'tv').slice(0, 5);
+    const recentMovies = allMediaCombined.filter(m => m.mediaType === 'movie').slice(0, 5);
+    const recentSeries = allMediaCombined.filter(m => m.mediaType === 'tv').slice(0, 5);
     
     // Intercalar filmes e séries
     const balanced: MediaItem[] = [];
@@ -123,15 +146,20 @@ export default function Home() {
 
   // Categorize media by genre
   const categorizeMedia = () => {
-    if (!allMedia) return {};
+    if (!allMediaCombined) return {};
     
     const categories: { [key: string]: MediaItem[] } = {
-      'Filmes': allMedia.filter(m => m.mediaType === 'movie'),
-      'Séries e Animes': allMedia.filter(m => m.mediaType === 'tv'),
+      'Filmes': allMediaCombined.filter(m => m.mediaType === 'movie'),
+      'Séries e Animes': allMediaCombined.filter(m => m.mediaType === 'tv'),
     };
 
+    // Add Fã Dublagem category if there are fandub items
+    if (fanDubMedia.length > 0) {
+      categories['Fã Dublagem'] = fanDubMedia;
+    }
+
     // Group by primary genre
-    allMedia.forEach(media => {
+    allMediaCombined.forEach(media => {
       if (media.genres && media.genres.length > 0) {
         const genreId = media.genres[0];
         const genreName = getGenreName(genreId);
@@ -537,7 +565,7 @@ export default function Home() {
               title={featuredConfig.title}
               description={featuredConfig.description}
               onPlay={async () => {
-                const media = allMedia?.find(m => m.tmdbId === featuredConfig.tmdbId);
+                const media = allMediaCombined?.find(m => m.tmdbId === featuredConfig.tmdbId);
                 if (media) {
                   if (media.mediaType === 'movie') {
                     await handlePlayMovie(media);
@@ -547,7 +575,7 @@ export default function Home() {
                 }
               }}
               onMoreInfo={() => {
-                const media = allMedia?.find(m => m.tmdbId === featuredConfig.tmdbId);
+                const media = allMediaCombined?.find(m => m.tmdbId === featuredConfig.tmdbId);
                 if (media) {
                   handleMediaClick(media);
                 }
@@ -621,7 +649,7 @@ export default function Home() {
           setIsBrowseOpen(false);
           setMobileTab('home');
         }}
-        allMedia={allMedia}
+        allMedia={allMediaCombined}
         isLoading={isLoadingMedia}
         onMediaClick={handleMediaClick}
         onAddToList={handleAddToList}
