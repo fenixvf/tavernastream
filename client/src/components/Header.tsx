@@ -3,15 +3,17 @@ import { Film, Search, Menu, Heart, Compass } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Link, useRoute } from 'wouter';
+import { NotificationCenter } from '@/components/NotificationCenter';
 
 interface HeaderProps {
   onSearch: (query: string) => void;
   onLogoClick: () => void;
   onMenuClick?: () => void;
   onBrowseClick?: () => void;
+  onNotificationClick?: (tmdbId?: number, mediaType?: 'movie' | 'tv') => void;
 }
 
-export function Header({ onSearch, onLogoClick, onMenuClick, onBrowseClick }: HeaderProps) {
+export function Header({ onSearch, onLogoClick, onMenuClick, onBrowseClick, onNotificationClick }: HeaderProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [isMyListPage] = useRoute('/minha-lista');
@@ -84,35 +86,39 @@ export function Header({ onSearch, onLogoClick, onMenuClick, onBrowseClick }: He
           </Button>
         )}
 
-        {/* Search Bar */}
-        <form
-          onSubmit={handleSearch}
-          className={`flex items-center gap-2 transition-all ${
-            isSearchExpanded ? 'flex-1 max-w-2xl' : 'w-auto'
-          }`}
-        >
-          <div className="relative flex-1 max-w-md md:max-w-2xl">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
-            <Input
-              type="search"
-              placeholder="Buscar filmes, séries, animes..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => setIsSearchExpanded(true)}
-              onBlur={() => !searchQuery && setIsSearchExpanded(false)}
-              className="pl-10 pr-4 bg-secondary/50 border-white/10 rounded-full focus:bg-secondary focus:border-primary/50 transition-colors"
-              data-testid="input-search"
-            />
-          </div>
-          <Button
-            type="submit"
-            size="icon"
-            className="rounded-full hidden md:flex"
-            data-testid="button-search-submit"
+        {/* Search Bar & Notifications */}
+        <div className="flex items-center gap-2">
+          <form
+            onSubmit={handleSearch}
+            className={`flex items-center gap-2 transition-all ${
+              isSearchExpanded ? 'flex-1 max-w-2xl' : 'w-auto'
+            }`}
           >
-            <Search className="w-5 h-5" />
-          </Button>
-        </form>
+            <div className="relative flex-1 max-w-md md:max-w-2xl">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
+              <Input
+                type="search"
+                placeholder="Buscar filmes, séries, animes..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setIsSearchExpanded(true)}
+                onBlur={() => !searchQuery && setIsSearchExpanded(false)}
+                className="pl-10 pr-4 bg-secondary/50 border-white/10 rounded-full focus:bg-secondary focus:border-primary/50 transition-colors"
+                data-testid="input-search"
+              />
+            </div>
+            <Button
+              type="submit"
+              size="icon"
+              className="rounded-full hidden md:flex"
+              data-testid="button-search-submit"
+            >
+              <Search className="w-5 h-5" />
+            </Button>
+          </form>
+          
+          <NotificationCenter onNotificationClick={onNotificationClick} />
+        </div>
       </div>
     </header>
   );

@@ -7,7 +7,7 @@ interface CacheEntry<T> {
 }
 
 const CACHE_TTL = 10000; // 10 segundos - cache curto para resposta rápida
-const POLL_INTERVAL = 15000; // 15 segundos - verificar atualizações frequentemente
+const POLL_INTERVAL = 30000; // 30 segundos - verificar atualizações
 
 let moviesCacheData: CacheEntry<MovieBinData> | null = null;
 let seriesCacheData: CacheEntry<SeriesBinData> | null = null;

@@ -20,23 +20,24 @@ import {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
-  // Get hero media (primeiros itens dos bancos Firebase que são os mais recentes)
+  // Get hero media (primeiros itens dos bancos Firebase que são os mais recentes + fandubs recentes)
   app.get("/api/media/hero", async (req, res) => {
     try {
-      // Pegar os IDs dos bancos Firebase - primeiros são os mais recentes
       const [movieIds, seriesIds] = await Promise.all([
         getAllMovieIds(),
         getAllSeriesIds()
       ]);
       
-      // Pegar os primeiros IDs (3 filmes e 2 séries para balancear melhor)
-      const lastMovieIds = movieIds.slice(0, 3);
+      const { fanDubConfig } = await import('../client/src/lib/fanDubConfig.js');
+      const fandubIds = fanDubConfig.slice(0, 2);
+      
+      const lastMovieIds = movieIds.slice(0, 2);
       const lastSeriesIds = seriesIds.slice(0, 2);
       
       const movies: MediaItem[] = [];
       const series: MediaItem[] = [];
+      const fandubs: MediaItem[] = [];
       
-      // Buscar detalhes dos últimos filmes
       for (const movieId of lastMovieIds) {
         try {
           const [details, externalIds, hasVideo] = await Promise.all([
@@ -62,7 +63,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Buscar detalhes das últimas séries
       for (const seriesId of lastSeriesIds) {
         try {
           const [details, hasVideo] = await Promise.all([
@@ -86,16 +86,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Intercalar filmes e séries para balanceamento: filme, série, filme, série, filme
+      for (const fandubItem of fandubIds) {
+        try {
+          const details = fandubItem.mediaType === 'movie'
+            ? await getMovieDetails(fandubItem.tmdbId)
+            : await getTVDetails(fandubItem.tmdbId);
+          
+          const title = fandubItem.mediaType === 'movie'
+            ? (details as any).title
+            : (details as any).name;
+          
+          fandubs.push({
+            tmdbId: fandubItem.tmdbId,
+            title: title || '',
+            posterPath: details.poster_path,
+            backdropPath: details.backdrop_path,
+            overview: details.overview || '',
+            rating: details.vote_average || 0,
+            releaseDate: fandubItem.mediaType === 'movie'
+              ? (details as any).release_date || ''
+              : (details as any).first_air_date || '',
+            mediaType: fandubItem.mediaType,
+            genres: [...(details.genres?.map((g: any) => g.id) || []), -1],
+            hasVideo: true,
+          });
+        } catch (error) {
+          console.error(`Error fetching fandub ${fandubItem.tmdbId}:`, error);
+        }
+      }
+      
       const candidates: MediaItem[] = [];
-      const maxItems = Math.max(movies.length, series.length);
+      const maxItems = Math.max(movies.length, series.length, fandubs.length);
       for (let i = 0; i < maxItems; i++) {
         if (movies[i]) candidates.push(movies[i]);
         if (series[i]) candidates.push(series[i]);
+        if (fandubs[i]) candidates.push(fandubs[i]);
       }
       
-      // Retornar até 5 itens
-      res.json(candidates.slice(0, 5));
+      res.json(candidates.slice(0, 6));
     } catch (error) {
       console.error('Error fetching hero media:', error);
       res.status(500).json({ error: 'Failed to fetch hero media' });
@@ -533,6 +561,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error fetching fandub series episodes:', error);
       res.status(500).json({ error: 'Failed to fetch fandub series episodes' });
+    }
+  });
+
+  app.get("/api/notifications", async (req, res) => {
+    try {
+      const notifications = await storage.getNotifications();
+      res.json(notifications);
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      res.status(500).json({ error: 'Failed to fetch notifications' });
+    }
+  });
+
+  app.get("/api/notifications/unread", async (req, res) => {
+    try {
+      const notifications = await storage.getUnreadNotifications();
+      res.json(notifications);
+    } catch (error) {
+      console.error('Error fetching unread notifications:', error);
+      res.status(500).json({ error: 'Failed to fetch unread notifications' });
+    }
+  });
+
+  app.post("/api/notifications", async (req, res) => {
+    try {
+      const { insertNotificationSchema } = await import('@shared/schema');
+      const validatedData = insertNotificationSchema.parse(req.body);
+      const notification = await storage.createNotification(validatedData);
+      res.status(201).json(notification);
+    } catch (error) {
+      console.error('Error creating notification:', error);
+      res.status(400).json({ error: 'Invalid notification data' });
+    }
+  });
+
+  app.patch("/api/notifications/:id/read", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const success = await storage.markNotificationAsRead(id);
+      if (!success) {
+        return res.status(404).json({ error: 'Notification not found' });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+      res.status(500).json({ error: 'Failed to mark notification as read' });
+    }
+  });
+
+  app.patch("/api/notifications/read-all", async (req, res) => {
+    try {
+      await storage.markAllNotificationsAsRead();
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+      res.status(500).json({ error: 'Failed to mark notifications as read' });
+    }
+  });
+
+  app.delete("/api/notifications/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const success = await storage.deleteNotification(id);
+      if (!success) {
+        return res.status(404).json({ error: 'Notification not found' });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting notification:', error);
+      res.status(500).json({ error: 'Failed to delete notification' });
     }
   });
 

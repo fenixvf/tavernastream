@@ -47,18 +47,18 @@ export default function Home() {
 
   const { getContinueWatching, watchProgress, getProgress, removeFromContinueWatching } = useWatchProgress();
 
-  // Fetch all media (movies + series) - atualiza a cada 15 segundos
+  // Fetch all media (movies + series) - atualiza a cada 30 segundos
   const { data: allMedia, isLoading: isLoadingMedia } = useQuery<MediaItem[]>({
     queryKey: ['/api/media/all'],
-    refetchInterval: 15000,
-    staleTime: 10000,
+    refetchInterval: 30000,
+    staleTime: 25000,
   });
 
-  // Fetch hero media (últimos 4 itens rotacionados)
+  // Fetch hero media (últimos itens rotacionados + fandubs)
   const { data: heroMediaItems = [] } = useQuery<MediaItem[]>({
     queryKey: ['/api/media/hero'],
-    refetchInterval: 15000,
-    staleTime: 10000,
+    refetchInterval: 30000,
+    staleTime: 25000,
   });
 
   // Fetch my list
@@ -132,24 +132,27 @@ export default function Home() {
     })
     .filter(Boolean) as MediaItem[];
 
-  // Get new releases - balanceado entre filmes e séries (5 de cada), excluindo fandubs
+  // Get new releases - balanceado entre filmes, séries E fandubs (incluindo fandubs agora!)
   const newReleases = (() => {
     if (!allMediaCombined) return [];
     
     const recentMovies = allMediaCombined
       .filter(m => m.mediaType === 'movie' && !m.genres?.includes(-1))
-      .slice(0, 5);
+      .slice(0, 4);
     const recentSeries = allMediaCombined
       .filter(m => m.mediaType === 'tv' && !m.genres?.includes(-1))
-      .slice(0, 5);
+      .slice(0, 4);
+    const recentFandubs = allMediaCombined
+      .filter(m => m.genres?.includes(-1))
+      .slice(0, 3);
     
-    // Intercalar filmes e séries
     const balanced: MediaItem[] = [];
-    const maxLength = Math.max(recentMovies.length, recentSeries.length);
+    const maxLength = Math.max(recentMovies.length, recentSeries.length, recentFandubs.length);
     
     for (let i = 0; i < maxLength; i++) {
       if (recentMovies[i]) balanced.push(recentMovies[i]);
       if (recentSeries[i]) balanced.push(recentSeries[i]);
+      if (recentFandubs[i]) balanced.push(recentFandubs[i]);
     }
     
     return balanced;
@@ -509,6 +512,14 @@ export default function Home() {
         onSearch={handleSearch}
         onLogoClick={handleLogoClick}
         onBrowseClick={() => setIsBrowseOpen(true)}
+        onNotificationClick={(tmdbId, mediaType) => {
+          if (tmdbId && mediaType) {
+            const media = allMediaCombined?.find(m => m.tmdbId === tmdbId && m.mediaType === mediaType);
+            if (media) {
+              handleMediaClick(media);
+            }
+          }
+        }}
       />
 
       {/* Main Content */}

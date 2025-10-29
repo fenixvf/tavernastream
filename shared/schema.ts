@@ -168,3 +168,27 @@ export const GENRE_MAP: { [key: number]: string } = {
   10767: 'Talk Show',
   10768: 'Guerra & Política',
 };
+
+// Notification System
+export interface Notification {
+  id: string;
+  tmdbId?: number;
+  mediaType?: 'movie' | 'tv';
+  title: string;
+  message: string;
+  posterPath?: string | null;
+  type: 'auto' | 'manual';
+  createdAt: string;
+  read: boolean;
+}
+
+export const insertNotificationSchema = z.object({
+  title: z.string().min(1),
+  message: z.string().min(1),
+  tmdbId: z.number().optional(),
+  mediaType: z.enum(['movie', 'tv']).optional(),
+  posterPath: z.string().nullable().optional(),
+  type: z.enum(['auto', 'manual']).default('manual'),
+});
+
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
