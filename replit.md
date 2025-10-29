@@ -15,6 +15,7 @@ TavernaStream is a full-stack web application for streaming movies and series. I
 - ✅ Selo "FANDUB" adicionado ao canto superior esquerdo dos posters de fandub
 - ✅ Limite de 20 itens por categoria na tela inicial para melhor performance e UX
 - ✅ Botão X para remover itens do "Continue Assistindo" funcionando corretamente
+- ✅ Corrigido bug crítico: séries normais agora mostram ambos os players (PlayerFlix e Drive) corretamente
 
 **Detalhes Técnicos:**
 - Criado `studioNameMap` no Home.tsx para mapear IDs de obras com nomes de estúdios
@@ -22,6 +23,8 @@ TavernaStream is a full-stack web application for streaming movies and series. I
 - Filtros aplicados em `newReleases` e `categorizeMedia` para excluir itens com genre ID -1
 - Todas as categorias (incluindo "Fã Dublagem") limitadas a 20 itens via `.slice(0, 20)`
 - CategoryRow atualizado para passar `studioNameMap` aos MediaCards
+- **Player Detection Fix**: PlayerOverlay agora usa prop `isFanDub` baseada no `genres.includes(-1)` intrínseco do media, eliminando condições de corrida com `fanDubConfig`
+- Séries normais exibem ambos os players; fandubs apenas Drive (Player 2)
 
 ### Fan Dubbing System Updates (October 29, 2025)
 
