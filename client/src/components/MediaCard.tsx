@@ -13,9 +13,10 @@ interface MediaCardProps {
   allProgress?: WatchProgress[];
   showProgress?: boolean;
   onRemove?: () => void;
+  studioName?: string;
 }
 
-export function MediaCard({ media, onClick, onAddToList, isInList, allProgress = [], showProgress = false, onRemove }: MediaCardProps) {
+export function MediaCard({ media, onClick, onAddToList, isInList, allProgress = [], showProgress = false, onRemove, studioName }: MediaCardProps) {
   const [isHovered, setIsHovered] = useState(false);
 
   const posterUrl = media.posterPath
@@ -31,6 +32,7 @@ export function MediaCard({ media, onClick, onAddToList, isInList, allProgress =
     : allProgress.find(p => p.tmdbId === media.tmdbId && p.mediaType === 'movie');
 
   const isCompleted = watchProgress?.completed;
+  const isFanDub = media.genres?.includes(-1);
 
   return (
     <div
@@ -49,6 +51,18 @@ export function MediaCard({ media, onClick, onAddToList, isInList, allProgress =
           className="w-full h-full object-cover"
           loading="lazy"
         />
+
+        {/* Selo de FANDUB no canto superior esquerdo */}
+        {isFanDub && (
+          <div className="absolute top-2 left-2 z-10">
+            <Badge
+              className="bg-red-600/95 backdrop-blur-sm text-white border-0 rounded px-2 py-1 text-xs font-bold"
+              data-testid={`badge-fandub-${media.tmdbId}`}
+            >
+              FANDUB
+            </Badge>
+          </div>
+        )}
 
         {/* Rating Badge or Completed Badge */}
         <div className="absolute top-2 right-2 z-10">
@@ -123,6 +137,11 @@ export function MediaCard({ media, onClick, onAddToList, isInList, allProgress =
           <div className="absolute bottom-0 left-0 right-0 p-3">
             <h3 className="text-white font-semibold text-sm line-clamp-2 mb-1">
               {media.title}
+              {isFanDub && studioName && (
+                <span className="text-red-500 font-bold ml-2">
+                  {studioName}
+                </span>
+              )}
             </h3>
             {media.hasVideo && (
               <div className="w-2 h-2 bg-primary rounded-full" />
@@ -135,6 +154,11 @@ export function MediaCard({ media, onClick, onAddToList, isInList, allProgress =
       <div className="md:hidden mt-2">
         <h3 className="text-sm font-semibold line-clamp-2" data-testid={`text-title-${media.tmdbId}`}>
           {media.title}
+          {isFanDub && studioName && (
+            <span className="text-red-500 font-bold ml-2">
+              {studioName}
+            </span>
+          )}
         </h3>
       </div>
     </div>

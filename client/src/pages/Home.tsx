@@ -91,6 +91,12 @@ export default function Home() {
 
   const fanDubMedia = fanDubMediaQuery.data || [];
 
+  // Create a map of tmdbId to studioName for fandub items
+  const studioNameMap = fanDubConfig.reduce((acc, item) => {
+    acc[item.tmdbId] = item.studioName;
+    return acc;
+  }, {} as Record<number, string>);
+
   // Merge fandub media with all media, avoiding duplicates
   const allMediaCombined = (() => {
     if (!allMedia) return fanDubMedia;
@@ -125,12 +131,16 @@ export default function Home() {
     })
     .filter(Boolean) as MediaItem[];
 
-  // Get new releases - balanceado entre filmes e séries (5 de cada)
+  // Get new releases - balanceado entre filmes e séries (5 de cada), excluindo fandubs
   const newReleases = (() => {
     if (!allMediaCombined) return [];
     
-    const recentMovies = allMediaCombined.filter(m => m.mediaType === 'movie').slice(0, 5);
-    const recentSeries = allMediaCombined.filter(m => m.mediaType === 'tv').slice(0, 5);
+    const recentMovies = allMediaCombined
+      .filter(m => m.mediaType === 'movie' && !m.genres?.includes(-1))
+      .slice(0, 5);
+    const recentSeries = allMediaCombined
+      .filter(m => m.mediaType === 'tv' && !m.genres?.includes(-1))
+      .slice(0, 5);
     
     // Intercalar filmes e séries
     const balanced: MediaItem[] = [];
@@ -149,19 +159,15 @@ export default function Home() {
     if (!allMediaCombined) return {};
     
     const categories: { [key: string]: MediaItem[] } = {
-      'Filmes': allMediaCombined.filter(m => m.mediaType === 'movie'),
-      'Séries e Animes': allMediaCombined.filter(m => m.mediaType === 'tv'),
+      'Filmes': allMediaCombined.filter(m => m.mediaType === 'movie' && !m.genres?.includes(-1)),
+      'Séries e Animes': allMediaCombined.filter(m => m.mediaType === 'tv' && !m.genres?.includes(-1)),
     };
 
-    // Add Fã Dublagem category if there are fandub items
-    if (fanDubMedia.length > 0) {
-      categories['Fã Dublagem'] = fanDubMedia;
-    }
-
-    // Group by primary genre
+    // Group by primary genre (excluding fandub items)
     allMediaCombined.forEach(media => {
       if (media.genres && media.genres.length > 0) {
         const genreId = media.genres[0];
+        if (genreId === -1) return;
         const genreName = getGenreName(genreId);
         if (genreName) {
           if (!categories[genreName]) {
@@ -532,6 +538,7 @@ export default function Home() {
               allProgress={watchProgress}
               showProgress={true}
               onRemove={handleRemoveFromContinueWatching}
+              studioNameMap={studioNameMap}
             />
           )}
 
@@ -542,19 +549,6 @@ export default function Home() {
               title="Novidades"
               media={newReleases}
               onMediaClick={handleMediaClick}
-              allProgress={watchProgress}
-            />
-          )}
-
-          {/* Fã Dublagem - Projetos de fã dublagem */}
-          {fanDubMedia.length > 0 && (
-            <CategoryRow
-              key="fandub"
-              title="Fã Dublagem"
-              media={fanDubMedia}
-              onMediaClick={handleMediaClick}
-              onAddToList={handleAddToList}
-              myListIds={myListIds}
               allProgress={watchProgress}
             />
           )}
@@ -585,18 +579,33 @@ export default function Home() {
             />
           )}
 
+          {/* Fã Dublagem - Projetos de fã dublagem */}
+          {fanDubMedia.length > 0 && (
+            <CategoryRow
+              key="fandub"
+              title="Fã Dublagem"
+              media={fanDubMedia.slice(0, 20)}
+              onMediaClick={handleMediaClick}
+              onAddToList={handleAddToList}
+              myListIds={myListIds}
+              allProgress={watchProgress}
+              studioNameMap={studioNameMap}
+            />
+          )}
+
           {/* Categories */}
           {Object.entries(categories).map(([categoryName, items]) => (
             items.length > 0 && (
               <CategoryRow
                 key={categoryName}
                 title={categoryName}
-                media={items}
+                media={items.slice(0, 20)}
                 onMediaClick={handleMediaClick}
                 onAddToList={handleAddToList}
                 myListIds={myListIds}
                 allProgress={watchProgress}
                 onBrowseClick={() => setIsBrowseOpen(true)}
+                studioNameMap={studioNameMap}
               />
             )
           ))}

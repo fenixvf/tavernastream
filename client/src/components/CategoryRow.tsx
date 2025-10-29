@@ -15,9 +15,10 @@ interface CategoryRowProps {
   showProgress?: boolean;
   onRemove?: (media: MediaItem) => void;
   onBrowseClick?: () => void;
+  studioNameMap?: Record<number, string>;
 }
 
-export function CategoryRow({ title, media, onMediaClick, onAddToList, myListIds, allProgress, showProgress = false, onRemove, onBrowseClick }: CategoryRowProps) {
+export function CategoryRow({ title, media, onMediaClick, onAddToList, myListIds, allProgress, showProgress = false, onRemove, onBrowseClick, studioNameMap = {} }: CategoryRowProps) {
   const isContinueWatching = title === "Continuar Assistindo";
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -106,6 +107,7 @@ export function CategoryRow({ title, media, onMediaClick, onAddToList, myListIds
                   allProgress={allProgress}
                   showProgress={showProgress}
                   onRemove={onRemove ? () => onRemove(item) : undefined}
+                  studioName={studioNameMap[item.tmdbId]}
                 />
               </div>
             );
