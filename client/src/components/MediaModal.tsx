@@ -41,11 +41,11 @@ export function MediaModal({
     enabled: mediaType === 'tv' && isOpen && !!details,
   });
 
-  // Check if this is a fandub item
-  const isFanDub = details?.genres?.some(g => g.id === -1) || false;
-  const fanDubInfo = isFanDub ? fanDubConfig.find(
-    item => item.tmdbId === details?.id && item.mediaType === mediaType
+  // Check if this is a fandub item - verify directly in fanDubConfig
+  const fanDubInfo = details ? fanDubConfig.find(
+    item => item.tmdbId === details.id && item.mediaType === mediaType
   ) : null;
+  const isFanDub = !!fanDubInfo;
 
   // Fetch fandub series episodes from GitHub
   const { data: fanDubSeriesData } = useQuery<SeriesBinData[string]>({

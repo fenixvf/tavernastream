@@ -321,24 +321,25 @@ export default function Home() {
     // Verificar se é um item de fandub
     const isFanDub = fanDubConfig.some(item => item.tmdbId === selectedMedia.tmdbId && item.mediaType === 'tv');
     
-    const seasonKey = seasonNumber.toString();
-    const seasonEpisodes = seriesData?.temporadas?.[seasonKey as keyof typeof seriesData.temporadas] as string[] | undefined;
-    
+    let seasonEpisodes: string[] | undefined;
     let driveUrl: string | undefined;
     
     if (isFanDub) {
-      // Para fandub de séries, buscar URL do endpoint de fandub
+      // Para fandub, buscar estrutura de episódios do GitHub
       try {
-        const response = await fetch(`/api/fan-dub/tv/${selectedMedia.tmdbId}/url`);
+        const response = await fetch(`/api/fan-dub/tv/${selectedMedia.tmdbId}/episodes`);
         if (response.ok) {
           const data = await response.json();
-          driveUrl = data.url;
+          seasonEpisodes = data.temporadas?.[seasonNumber];
+          driveUrl = seasonEpisodes?.[episodeNumber - 1];
         }
       } catch (error) {
-        console.error('Error fetching fandub series URL:', error);
+        console.error('Error fetching fandub episodes:', error);
       }
     } else {
       // Buscar URL normal do seriesData
+      const seasonKey = seasonNumber.toString();
+      seasonEpisodes = seriesData?.temporadas?.[seasonKey as keyof typeof seriesData.temporadas] as string[] | undefined;
       driveUrl = seasonEpisodes?.[episodeNumber - 1];
     }
     
@@ -394,24 +395,25 @@ export default function Home() {
     // Verificar se é um item de fandub
     const isFanDub = fanDubConfig.some(item => item.tmdbId === playerConfig.tmdbId && item.mediaType === 'tv');
     
-    const seasonKey = playerConfig.seasonNumber.toString();
-    const seasonEpisodes = seriesData?.temporadas?.[seasonKey as keyof typeof seriesData.temporadas] as string[] | undefined;
-    
+    let seasonEpisodes: string[] | undefined;
     let driveUrl: string | undefined;
     
     if (isFanDub) {
-      // Para fandub de séries, usar a mesma URL (pois é um único arquivo)
+      // Para fandub, buscar estrutura de episódios do GitHub
       try {
-        const response = await fetch(`/api/fan-dub/tv/${playerConfig.tmdbId}/url`);
+        const response = await fetch(`/api/fan-dub/tv/${playerConfig.tmdbId}/episodes`);
         if (response.ok) {
           const data = await response.json();
-          driveUrl = data.url;
+          seasonEpisodes = data.temporadas?.[playerConfig.seasonNumber];
+          driveUrl = seasonEpisodes?.[newEpisodeNumber - 1];
         }
       } catch (error) {
-        console.error('Error fetching fandub series URL:', error);
+        console.error('Error fetching fandub episodes:', error);
       }
     } else {
       // Buscar URL normal do seriesData
+      const seasonKey = playerConfig.seasonNumber.toString();
+      seasonEpisodes = seriesData?.temporadas?.[seasonKey as keyof typeof seriesData.temporadas] as string[] | undefined;
       driveUrl = seasonEpisodes?.[newEpisodeNumber - 1];
     }
     
