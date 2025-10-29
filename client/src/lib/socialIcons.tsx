@@ -1,5 +1,6 @@
-import { Instagram, Twitter, Youtube, Facebook, Globe } from 'lucide-react';
+import { Instagram, Twitter, Youtube, Facebook, Globe, type LucideProps } from 'lucide-react';
 import { SiTiktok, SiX } from 'react-icons/si';
+import type { IconBaseProps } from 'react-icons';
 
 export type SocialPlatform = 'instagram' | 'twitter' | 'x' | 'youtube' | 'facebook' | 'tiktok' | 'other';
 
@@ -34,20 +35,22 @@ interface SocialIconProps {
 }
 
 export function SocialIcon({ platform, className = "w-5 h-5" }: SocialIconProps) {
+  const iconProps: LucideProps | IconBaseProps = { className };
+  
   switch (platform) {
     case 'instagram':
-      return <Instagram className={className} />;
+      return <Instagram {...iconProps} />;
     case 'x':
-      return <SiX className={className} />;
+      return <SiX {...iconProps} />;
     case 'twitter':
-      return <Twitter className={className} />;
+      return <Twitter {...iconProps} />;
     case 'youtube':
-      return <Youtube className={className} />;
+      return <Youtube {...iconProps} />;
     case 'facebook':
-      return <Facebook className={className} />;
+      return <Facebook {...iconProps} />;
     case 'tiktok':
-      return <SiTiktok className={className} />;
+      return <SiTiktok {...iconProps} />;
     default:
-      return <Globe className={className} />;
+      return <Globe {...iconProps} />;
   }
 }
