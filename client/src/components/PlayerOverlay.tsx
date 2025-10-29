@@ -23,6 +23,7 @@ interface PlayerOverlayProps {
   onEpisodeChange?: (episodeNumber: number) => void;
   autoPlayPlayerFlix?: boolean; // Auto-selecionar Player 1 (para continuar assistindo)
   resumeTime?: number; // Tempo em segundos para começar
+  isFanDub?: boolean; // Indica se é conteúdo de fandub
 }
 
 export function PlayerOverlay({
@@ -42,6 +43,7 @@ export function PlayerOverlay({
   onEpisodeChange,
   autoPlayPlayerFlix = false,
   resumeTime,
+  isFanDub = false,
 }: PlayerOverlayProps) {
   const [selectedPlayer, setSelectedPlayer] = useState<PlayerType | null>(null);
   const [showAdWarning, setShowAdWarning] = useState(false);
@@ -50,17 +52,17 @@ export function PlayerOverlay({
   const { saveProgress } = useWatchProgress();
 
   // Auto-selecionar PlayerFlix quando autoPlayPlayerFlix é true
-  // OU auto-selecionar Drive quando não há IMDB ID (fandub) mas há driveUrl
+  // OU auto-selecionar Drive quando é fandub mas há driveUrl
   useEffect(() => {
     if (isOpen && !selectedPlayer) {
-      if (!imdbId && driveUrl) {
-        // Se não tem IMDB ID mas tem Drive URL, é fandub - usar apenas Player 2
+      if (isFanDub && driveUrl) {
+        // Se é fandub e tem Drive URL - usar apenas Player 2
         handlePlayerSelect('drive');
       } else if (autoPlayPlayerFlix) {
         handlePlayerSelect('playerflix');
       }
     }
-  }, [isOpen, autoPlayPlayerFlix, imdbId, driveUrl]);
+  }, [isOpen, autoPlayPlayerFlix, isFanDub, driveUrl]);
 
   const saveCurrentProgress = useCallback((forceCurrentTime?: number) => {
     if (watchStartTime && selectedPlayer) {
@@ -262,8 +264,8 @@ export function PlayerOverlay({
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* PlayerFlix Option - Disponível apenas se houver IMDB ID */}
-                {imdbId && (
+                {/* PlayerFlix Option - Disponível apenas se NÃO for fandub */}
+                {!isFanDub && (
                   <button
                     onClick={() => handlePlayerSelect('playerflix')}
                     className="p-6 rounded-lg bg-card border-2 border-card-border hover:border-primary transition-all hover-elevate active-elevate-2 group"
@@ -290,14 +292,14 @@ export function PlayerOverlay({
                     driveUrl 
                       ? 'border-card-border hover:border-primary hover-elevate active-elevate-2 cursor-pointer' 
                       : 'border-card-border/30 cursor-not-allowed opacity-50'
-                  } group ${!imdbId && driveUrl ? 'md:col-span-2' : ''}`}
+                  } group ${isFanDub && driveUrl ? 'md:col-span-2' : ''}`}
                   data-testid="button-player-option-2"
                 >
                   <div className="space-y-2">
                     <h3 className={`text-xl font-bold transition-colors ${
                       driveUrl ? 'group-hover:text-primary' : 'text-muted-foreground'
                     }`}>
-                      {!imdbId && driveUrl ? 'Player Google Drive' : 'Opção 2'}
+                      {isFanDub && driveUrl ? 'Player Google Drive' : 'Opção 2'}
                     </h3>
                     <p className="text-sm text-muted-foreground">
                       {driveUrl ? 'Sem Anúncios' : 'Indisponível'}

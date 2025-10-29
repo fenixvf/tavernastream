@@ -42,6 +42,7 @@ export default function Home() {
     totalEpisodes?: number;
     autoPlayPlayerFlix?: boolean;
     resumeTime?: number;
+    isFanDub?: boolean;
   } | null>(null);
 
   const { getContinueWatching, watchProgress, getProgress, removeFromContinueWatching } = useWatchProgress();
@@ -275,8 +276,8 @@ export default function Home() {
     
     let driveUrl: string | undefined;
     
-    // Verificar se é um item de fandub
-    const isFanDub = fanDubConfig.some(item => item.tmdbId === mediaToPlay.tmdbId && item.mediaType === 'movie');
+    // Verificar se é um item de fandub pelo genre ID -1
+    const isFanDub = mediaToPlay.genres?.includes(-1) || false;
     
     try {
       if (isFanDub) {
@@ -317,6 +318,7 @@ export default function Home() {
       driveUrl,
       autoPlayPlayerFlix: isFanDub ? false : continueWatching,
       resumeTime,
+      isFanDub,
     });
     setIsPlayerOpen(true);
   };
@@ -324,8 +326,8 @@ export default function Home() {
   const handlePlayEpisode = async (seasonNumber: number, episodeNumber: number, continueWatching?: boolean) => {
     if (!selectedMedia) return;
     
-    // Verificar se é um item de fandub
-    const isFanDub = fanDubConfig.some(item => item.tmdbId === selectedMedia.tmdbId && item.mediaType === 'tv');
+    // Verificar se é um item de fandub pelo genre ID -1
+    const isFanDub = selectedMedia.genres?.includes(-1) || false;
     
     let seasonEpisodes: string[] | undefined;
     let driveUrl: string | undefined;
@@ -391,6 +393,7 @@ export default function Home() {
       totalEpisodes,
       autoPlayPlayerFlix: isFanDub ? false : continueWatching,
       resumeTime,
+      isFanDub,
     });
     setIsPlayerOpen(true);
   };
@@ -398,8 +401,8 @@ export default function Home() {
   const handleEpisodeChange = async (newEpisodeNumber: number) => {
     if (!playerConfig || !playerConfig.seasonNumber) return;
     
-    // Verificar se é um item de fandub
-    const isFanDub = fanDubConfig.some(item => item.tmdbId === playerConfig.tmdbId && item.mediaType === 'tv');
+    // Usar o valor de isFanDub já definido no playerConfig
+    const isFanDub = playerConfig.isFanDub || false;
     
     let seasonEpisodes: string[] | undefined;
     let driveUrl: string | undefined;
@@ -448,6 +451,7 @@ export default function Home() {
       episodeName,
       driveUrl,
       totalEpisodes,
+      isFanDub: playerConfig.isFanDub,
     });
   };
 
