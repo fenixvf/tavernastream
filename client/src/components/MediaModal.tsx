@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { X, Play, Heart, Check, Instagram } from 'lucide-react';
+import { X, Play, Heart, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { TMDBDetails, TMDBEpisode, SeriesBinData } from '@shared/schema';
 import { useWatchProgress } from '@/hooks/use-watch-progress';
 import { fanDubConfig } from '@/lib/fanDubConfig';
+import { detectSocialPlatform, SocialIcon } from '@/lib/socialIcons';
 
 interface MediaModalProps {
   isOpen: boolean;
@@ -40,6 +41,18 @@ export function MediaModal({
     enabled: mediaType === 'tv' && isOpen && !!details,
   });
 
+  // Check if this is a fandub item
+  const isFanDub = details?.genres?.some(g => g.id === -1) || false;
+  const fanDubInfo = isFanDub ? fanDubConfig.find(
+    item => item.tmdbId === details?.id && item.mediaType === mediaType
+  ) : null;
+
+  // Fetch fandub series episodes from GitHub
+  const { data: fanDubSeriesData } = useQuery<SeriesBinData[string]>({
+    queryKey: ['/api/fan-dub/tv', details?.id, 'episodes'],
+    enabled: mediaType === 'tv' && isOpen && isFanDub && !!details,
+  });
+
   const backdropUrl = details?.backdrop_path
     ? `https://image.tmdb.org/t/p/original${details.backdrop_path}`
     : null;
@@ -51,11 +64,8 @@ export function MediaModal({
     ? new Date(details.first_air_date).getFullYear()
     : '';
 
-  // Check if this is a fandub item
-  const isFanDub = details?.genres?.some(g => g.id === -1) || false;
-  const fanDubInfo = isFanDub ? fanDubConfig.find(
-    item => item.tmdbId === details?.id && item.mediaType === mediaType
-  ) : null;
+  // Detect social platform for dynamic icon
+  const socialPlatform = fanDubInfo ? detectSocialPlatform(fanDubInfo.studioSocialUrl) : 'other';
 
   if (!details) {
     return null;
@@ -158,7 +168,7 @@ export function MediaModal({
                 onClick={() => window.open(fanDubInfo.studioSocialUrl, '_blank')}
                 data-testid="button-modal-studio"
               >
-                <Instagram className="w-4 h-4 sm:w-5 sm:h-5" />
+                <SocialIcon platform={socialPlatform} className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span className="hidden xs:inline">{fanDubInfo.studioName}</span>
                 <span className="xs:hidden">Estúdio</span>
               </Button>
@@ -184,7 +194,9 @@ export function MediaModal({
                   if (season.season_number === 0) return null;
                   const seasonNumber = season.season_number;
                   const tmdbEpisodes = seasonDetails?.episodes || [];
-                  const firebaseEpisodes = seriesData?.temporadas?.[seasonNumber];
+                  const firebaseEpisodes = isFanDub 
+                    ? fanDubSeriesData?.temporadas?.[seasonNumber]
+                    : seriesData?.temporadas?.[seasonNumber];
                   
                   return (
                     <TabsContent key={seasonNumber} value={String(seasonNumber)} className="space-y-2 sm:space-y-3 mt-4">
@@ -193,6 +205,10 @@ export function MediaModal({
                         const progress = getProgress(details.id, 'tv', seasonNumber, episodeNumber);
                         const isWatched = progress?.completed || false;
                         const hasDriveUrl = firebaseEpisodes && firebaseEpisodes[episodeNumber - 1];
+                        
+                        if (isFanDub && !hasDriveUrl) {
+                          return null;
+                        }
                         
                         return (
                           <button

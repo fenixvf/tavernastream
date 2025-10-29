@@ -507,6 +507,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/fan-dub/tv/:id/episodes", async (req, res) => {
+    try {
+      const tmdbId = parseInt(req.params.id);
+      
+      if (isNaN(tmdbId)) {
+        return res.status(400).json({ error: 'Invalid TMDB ID' });
+      }
+      
+      const { FANDUB_SERIES_GITHUB_URL } = await import('../client/src/lib/fanDubConfig.js');
+      const { getFanDubSeries } = await import('./fandub-data.js');
+      const seriesData = await getFanDubSeries(FANDUB_SERIES_GITHUB_URL);
+      
+      const entry = seriesData[tmdbId.toString()];
+      
+      if (!entry) {
+        return res.status(404).json({ error: 'Fandub series not found' });
+      }
+      
+      if (typeof entry === 'object' && (entry as any).temporadas) {
+        res.json(entry);
+      } else {
+        res.status(404).json({ error: 'Series data structure not found' });
+      }
+    } catch (error) {
+      console.error('Error fetching fandub series episodes:', error);
+      res.status(500).json({ error: 'Failed to fetch fandub series episodes' });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
