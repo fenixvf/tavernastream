@@ -6,6 +6,27 @@ TavernaStream is a full-stack web application for streaming movies and series. I
 
 ## Recent Changes
 
+### Progressive Web App (PWA) Implementation (October 29, 2025)
+
+**PWA Funcional:**
+- ✅ Aplicação transformada em Progressive Web App completa
+- ✅ Manifest.json configurado com nome, ícones, cores e shortcuts
+- ✅ Service Worker com estratégia network-first para melhor performance
+- ✅ Funcionalidade offline para recursos já visitados
+- ✅ Ícone personalizado do dragão vermelho (logo Taverna Stream)
+- ✅ Instalável em dispositivos móveis e desktop
+- ✅ Suporte para iOS (apple-touch-icon) e Android
+- ✅ Revisado e aprovado pelo arquiteto para produção
+
+**Detalhes Técnicos:**
+- Service worker implementa network-first com fallback para cache
+- Precache de index.html e manifest.json durante instalação
+- Cache dinâmico de assets (JS, CSS, imagens) durante navegação
+- Requisições de API ignoradas do cache para dados sempre atualizados
+- Ícones em 192x192 e 512x512 pixels para diferentes dispositivos
+- Theme color #dc2626 (vermelho Taverna) para UI nativa
+- Shortcuts configurados para Início, Navegar e Minha Lista
+
 ### UI/UX Improvements & Fan Dubbing Enhancements (October 29, 2025)
 
 **Correções Implementadas:**

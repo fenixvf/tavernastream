@@ -1,18 +1,12 @@
 const CACHE_NAME = 'taverna-stream-v1';
-const STATIC_CACHE = [
-  '/',
-  '/index.html',
-  '/manifest.json'
-];
 
 self.addEventListener('install', (event) => {
   console.log('[Service Worker] Installing...');
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[Service Worker] Caching static assets');
-      return cache.addAll(STATIC_CACHE);
-    }).catch(err => {
-      console.log('[Service Worker] Cache failed:', err);
+      return cache.addAll(['/index.html', '/manifest.json']).catch(() => {
+        console.log('[Service Worker] Precache failed, will cache on first visit');
+      });
     })
   );
   self.skipWaiting();
@@ -36,30 +30,42 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  if (event.request.url.includes('/api/')) {
+  const url = new URL(event.request.url);
+  
+  if (url.pathname.startsWith('/api/')) {
+    return;
+  }
+
+  if (event.request.method !== 'GET') {
     return;
   }
 
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      if (response) {
+    fetch(event.request).then((response) => {
+      if (!response || response.status !== 200) {
         return response;
       }
 
-      return fetch(event.request).then((response) => {
-        if (!response || response.status !== 200 || response.type !== 'basic') {
-          return response;
-        }
-
+      if (response.type === 'basic' || response.type === 'cors') {
         const responseToCache = response.clone();
-
+        
         caches.open(CACHE_NAME).then((cache) => {
           cache.put(event.request, responseToCache);
         });
+      }
 
-        return response;
-      }).catch(() => {
-        return caches.match('/index.html');
+      return response;
+    }).catch(() => {
+      return caches.match(event.request).then((cachedResponse) => {
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+        
+        if (event.request.destination === 'document') {
+          return caches.match('/index.html');
+        }
+        
+        return new Response('Offline', { status: 503 });
       });
     })
   );
