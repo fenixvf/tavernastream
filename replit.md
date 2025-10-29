@@ -6,15 +6,32 @@ TavernaStream is a full-stack web application for streaming movies and series. I
 
 ## Recent Changes
 
-### Fan Dubbing System Updates (October 29, 2025)
+### UI/UX Improvements & Fan Dubbing Enhancements (October 29, 2025)
 
 **Correções Implementadas:**
+- ✅ Removida duplicação da categoria "Fã Dublagem" - agora aparece apenas uma vez, abaixo do Featured Banner
+- ✅ Fandubs excluídos da seção "Novidades" e de categorias por gênero para evitar duplicação
+- ✅ Nome do estúdio aparece em vermelho ao lado do título nas obras de fandub
+- ✅ Selo "FANDUB" adicionado ao canto superior esquerdo dos posters de fandub
+- ✅ Limite de 20 itens por categoria na tela inicial para melhor performance e UX
+- ✅ Botão X para remover itens do "Continue Assistindo" funcionando corretamente
+
+**Detalhes Técnicos:**
+- Criado `studioNameMap` no Home.tsx para mapear IDs de obras com nomes de estúdios
+- MediaCard agora aceita prop `studioName` e detecta fandubs via `genres.includes(-1)`
+- Filtros aplicados em `newReleases` e `categorizeMedia` para excluir itens com genre ID -1
+- Todas as categorias (incluindo "Fã Dublagem") limitadas a 20 itens via `.slice(0, 20)`
+- CategoryRow atualizado para passar `studioNameMap` aos MediaCards
+
+### Fan Dubbing System Updates (October 29, 2025)
+
+**Correções Anteriores:**
 - ✅ Sistema de ícones dinâmicos para botão de estúdio: detecta automaticamente Instagram, YouTube, Twitter/X, Facebook, TikTok
 - ✅ Filtro de episódios para fandubs: mostra apenas episódios com links de incorporação disponíveis no GitHub
 - ✅ Novo endpoint `/api/fan-dub/tv/:id/episodes` para buscar estrutura de episódios do GitHub
 - ✅ Player 2 exclusivo para fandubs: funciona apenas com links de incorporação do Drive
 
-**Detalhes Técnicos:**
+**Detalhes Técnicos Anteriores:**
 - Criado `client/src/lib/socialIcons.tsx` com função `detectSocialPlatform()` e componente `SocialIcon`
 - Atualizado `MediaModal` para buscar dados de episódios do GitHub e filtrar apenas os disponíveis
 - Sistema identifica fandubs pelo genre ID -1 e ajusta comportamento automaticamente
