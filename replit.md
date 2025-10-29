@@ -6,6 +6,19 @@ TavernaStream is a full-stack web application for streaming movies and series. I
 
 ## Recent Changes
 
+### Fan Dubbing System Updates (October 29, 2025)
+
+**Correções Implementadas:**
+- ✅ Sistema de ícones dinâmicos para botão de estúdio: detecta automaticamente Instagram, YouTube, Twitter/X, Facebook, TikTok
+- ✅ Filtro de episódios para fandubs: mostra apenas episódios com links de incorporação disponíveis no GitHub
+- ✅ Novo endpoint `/api/fan-dub/tv/:id/episodes` para buscar estrutura de episódios do GitHub
+- ✅ Player 2 exclusivo para fandubs: funciona apenas com links de incorporação do Drive
+
+**Detalhes Técnicos:**
+- Criado `client/src/lib/socialIcons.tsx` com função `detectSocialPlatform()` e componente `SocialIcon`
+- Atualizado `MediaModal` para buscar dados de episódios do GitHub e filtrar apenas os disponíveis
+- Sistema identifica fandubs pelo genre ID -1 e ajusta comportamento automaticamente
+
 ### Release Countdown & Fan Dubbing System Fixes (October 28, 2025)
 
 **Cronômetro Corrigido (ATUALIZAÇÃO FINAL):**
