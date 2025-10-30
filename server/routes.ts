@@ -10,6 +10,7 @@ import {
   searchMulti,
   getSeasonDetails,
   getVideos,
+  getImages,
 } from "./tmdb";
 import {
   getAllMovieIds,
@@ -267,6 +268,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error fetching videos:', error);
       res.status(500).json({ error: 'Failed to fetch videos' });
+    }
+  });
+
+  // Get logo image for media
+  app.get("/api/media/logo/:id/:type", async (req, res) => {
+    try {
+      const tmdbId = parseInt(req.params.id);
+      const mediaType = req.params.type as 'movie' | 'tv';
+      
+      if (isNaN(tmdbId)) {
+        return res.status(400).json({ error: 'Invalid TMDB ID' });
+      }
+      
+      const images = await getImages(tmdbId, mediaType);
+      
+      // Find the best logo (preferably Portuguese, then English, then any)
+      const ptLogo = images.logos.find((logo: any) => logo.iso_639_1 === 'pt');
+      const enLogo = images.logos.find((logo: any) => logo.iso_639_1 === 'en');
+      const anyLogo = images.logos[0];
+      
+      const selectedLogo = ptLogo || enLogo || anyLogo;
+      
+      if (selectedLogo) {
+        res.json({ logoPath: selectedLogo.file_path });
+      } else {
+        res.json({ logoPath: null });
+      }
+    } catch (error) {
+      console.error('Error fetching logo:', error);
+      res.json({ logoPath: null });
     }
   });
 

@@ -41,6 +41,12 @@ export function MediaModal({
     enabled: mediaType === 'tv' && isOpen && !!details,
   });
 
+  // Fetch logo image
+  const { data: logoData } = useQuery<{ logoPath: string | null }>({
+    queryKey: ['/api/media/logo', details?.id, mediaType],
+    enabled: isOpen && !!details,
+  });
+
   // Check if this is a fandub item - verify directly in fanDubConfig
   const fanDubInfo = details ? fanDubConfig.find(
     item => item.tmdbId === details.id && item.mediaType === mediaType
@@ -97,11 +103,16 @@ export function MediaModal({
               className="w-full h-full object-cover rounded-t-lg"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-card via-card/60 to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white drop-shadow-2xl" style={{ textShadow: '0 4px 12px rgba(0,0,0,0.8), 0 2px 4px rgba(0,0,0,0.6)' }}>
-                {title}
-              </h1>
-            </div>
+            {logoData?.logoPath && (
+              <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 flex items-end">
+                <img
+                  src={`https://image.tmdb.org/t/p/w500${logoData.logoPath}`}
+                  alt={title}
+                  className="max-w-[60%] sm:max-w-[50%] md:max-w-[40%] h-auto max-h-32 md:max-h-40 object-contain drop-shadow-2xl"
+                  style={{ filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.8)) drop-shadow(0 2px 4px rgba(0,0,0,0.6))' }}
+                />
+              </div>
+            )}
           </div>
         )}
 

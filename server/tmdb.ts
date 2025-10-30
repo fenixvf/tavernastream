@@ -90,3 +90,19 @@ export async function getVideos(
     `/${mediaType}/${tmdbId}/videos`
   );
 }
+
+export async function getImages(
+  tmdbId: number,
+  mediaType: 'movie' | 'tv'
+): Promise<{ logos: { file_path: string; width: number; height: number; iso_639_1?: string }[] }> {
+  // Para imagens, não queremos filtrar por idioma, mas incluir múltiplos idiomas
+  const url = `${TMDB_BASE_URL}/${mediaType}/${tmdbId}/images?api_key=${TMDB_API_KEY}&include_image_language=pt,en,null`;
+  
+  const response = await fetch(url);
+  
+  if (!response.ok) {
+    throw new Error(`TMDB API error: ${response.statusText}`);
+  }
+  
+  return response.json();
+}
