@@ -136,14 +136,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const tmdbId = parseInt(req.params.id);
       const mediaType = req.params.type as 'movie' | 'tv';
       
+      const { releaseConfig } = await import('../client/src/lib/releaseConfig.js');
+      const scheduledItem = releaseConfig.items.find(
+        item => item.tmdbId === tmdbId && item.mediaType === mediaType
+      );
+      
       if (mediaType === 'movie') {
         const movieIds = await getAllMovieIds();
         const exists = movieIds.includes(tmdbId);
-        res.json({ exists });
+        res.json({ 
+          exists,
+          isScheduled: !!scheduledItem,
+          releaseTimestamp: scheduledItem?.releaseTimestamp
+        });
       } else {
         const seriesIds = await getAllSeriesIds();
         const exists = seriesIds.includes(tmdbId);
-        res.json({ exists });
+        res.json({ 
+          exists,
+          isScheduled: !!scheduledItem,
+          releaseTimestamp: scheduledItem?.releaseTimestamp
+        });
       }
     } catch (error) {
       console.error('Error checking media existence:', error);

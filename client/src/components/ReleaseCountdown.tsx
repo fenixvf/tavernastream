@@ -35,6 +35,7 @@ export function ReleaseCountdown({
   });
   const [existsInCatalog, setExistsInCatalog] = useState(false);
   const [isCheckingCatalog, setIsCheckingCatalog] = useState(true);
+  const [isScheduled, setIsScheduled] = useState(false);
   const [showAvailableMessage, setShowAvailableMessage] = useState(() => {
     const now = Date.now();
     const hasReleased = releaseTimestamp <= now;
@@ -60,6 +61,7 @@ export function ReleaseCountdown({
         if (response.ok) {
           const data = await response.json();
           setExistsInCatalog(data.exists);
+          setIsScheduled(data.isScheduled || false);
         }
       } catch (error) {
         console.error('Error checking catalog:', error);
@@ -81,17 +83,32 @@ export function ReleaseCountdown({
       if (remaining <= 0) {
         if (!isReleased) {
           setIsReleased(true);
-          setShowAvailableMessage(true);
           
           localStorage.setItem(`${releaseKey}_isReleased`, 'true');
-          localStorage.setItem(`${releaseKey}_showMessage`, 'true');
-          localStorage.setItem(`${releaseKey}_timestamp`, now.toString());
           
-          toast({
-            title: "🎉 Novo conteúdo liberado!",
-            description: `${targetTitle} já está disponível no catálogo!`,
-            duration: 10000,
-          });
+          const checkAndNotify = async () => {
+            try {
+              const response = await fetch(`/api/media/check/${targetTmdbId}/${targetMediaType}`);
+              if (response.ok) {
+                const data = await response.json();
+                if (data.exists) {
+                  setShowAvailableMessage(true);
+                  localStorage.setItem(`${releaseKey}_showMessage`, 'true');
+                  localStorage.setItem(`${releaseKey}_timestamp`, now.toString());
+                  
+                  toast({
+                    title: "🎉 Novo conteúdo liberado!",
+                    description: `${targetTitle} já está disponível no catálogo!`,
+                    duration: 10000,
+                  });
+                }
+              }
+            } catch (error) {
+              console.error('Error checking catalog on release:', error);
+            }
+          };
+          
+          checkAndNotify();
         }
         setTimeRemaining(0);
         return;
@@ -149,7 +166,8 @@ export function ReleaseCountdown({
     ? `https://image.tmdb.org/t/p/original${backdropPath}`
     : null;
 
-  const isBlocked = !existsInCatalog && !isReleased;
+  const isBlocked = !existsInCatalog;
+  const isScheduledButNotReleased = isScheduled && !existsInCatalog;
 
   if (isReleased && showAvailableMessage) {
     return (
@@ -279,7 +297,15 @@ export function ReleaseCountdown({
                 </div>
               )}
 
-              {isBlocked && (
+              {isScheduledButNotReleased && (
+                <div className="bg-blue-500/20 border border-blue-500/40 rounded-lg p-2 md:p-3 text-center">
+                  <p className="text-xs text-blue-200 font-medium">
+                    📅 Agendado para lançamento
+                  </p>
+                </div>
+              )}
+              
+              {isBlocked && !isScheduledButNotReleased && (
                 <div className="bg-amber-500/20 border border-amber-500/40 rounded-lg p-2 md:p-3 text-center">
                   <p className="text-xs text-amber-200 font-medium">
                     ⚠️ Este conteúdo ainda não está disponível no catálogo

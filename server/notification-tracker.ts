@@ -2,17 +2,68 @@ import { storage } from "./storage";
 import { getAllMovieIds, getAllSeriesIds } from "./github-data";
 import { getMovieDetails, getTVDetails } from "./tmdb";
 import { fanDubConfig } from "../client/src/lib/fanDubConfig";
+import { releaseConfig } from "../client/src/lib/releaseConfig";
 
 let notifiedContentIds = new Set<string>();
 let previousMovieIds: number[] = [];
 let previousSeriesIds: number[] = [];
 let previousFandubIds: number[] = [];
+let releasedItems = new Set<string>();
 let isInitialized = false;
 
 const POLL_INTERVAL = 30000;
 
 function createContentKey(tmdbId: number, mediaType: 'movie' | 'tv'): string {
   return `${mediaType}-${tmdbId}`;
+}
+
+async function checkScheduledReleases() {
+  if (!releaseConfig.enabled || releaseConfig.items.length === 0) {
+    return;
+  }
+
+  const now = Date.now();
+  
+  for (const item of releaseConfig.items) {
+    const releaseKey = `release-${item.tmdbId}-${item.mediaType}`;
+    
+    if (item.releaseTimestamp <= now && !releasedItems.has(releaseKey)) {
+      const [currentMovieIds, currentSeriesIds] = await Promise.all([
+        getAllMovieIds(),
+        getAllSeriesIds()
+      ]);
+      
+      const isInCatalog = item.mediaType === 'movie' 
+        ? currentMovieIds.includes(item.tmdbId)
+        : currentSeriesIds.includes(item.tmdbId);
+      
+      if (isInCatalog) {
+        try {
+          const details = item.mediaType === 'movie'
+            ? await getMovieDetails(item.tmdbId)
+            : await getTVDetails(item.tmdbId);
+          
+          const title = item.mediaType === 'movie'
+            ? (details as any).title
+            : (details as any).name;
+          
+          await storage.createNotification({
+            title: `🎉 ${title} foi liberado!`,
+            message: `${title} já está disponível no catálogo!`,
+            tmdbId: item.tmdbId,
+            mediaType: item.mediaType,
+            posterPath: details.poster_path,
+            type: 'auto',
+          });
+          
+          releasedItems.add(releaseKey);
+          console.log(`[Release Notification] Notificação criada para: ${title}`);
+        } catch (error) {
+          console.error(`Error creating release notification for ${item.tmdbId}:`, error);
+        }
+      }
+    }
+  }
 }
 
 async function detectNewContent() {
@@ -136,8 +187,12 @@ async function detectNewContent() {
 
 export function startNotificationTracking() {
   detectNewContent();
+  checkScheduledReleases();
   
-  setInterval(detectNewContent, POLL_INTERVAL);
+  setInterval(() => {
+    detectNewContent();
+    checkScheduledReleases();
+  }, POLL_INTERVAL);
   
-  console.log(`[Notification Tracker] Started - checking for new content every ${POLL_INTERVAL/1000} seconds`);
+  console.log(`[Notification Tracker] Started - checking for new content and releases every ${POLL_INTERVAL/1000} seconds`);
 }
