@@ -6,6 +6,30 @@ TavernaStream is a full-stack web application for streaming movies and series. I
 
 ## Recent Changes
 
+### Melhorias de UI e UX - Fase 2 (October 30, 2025)
+
+**Botão de Remoção em "Continue Assistindo":**
+- ✅ Ícone X aumentado de w-4 h-4 para w-5 h-5
+- ✅ Botão aumentado de h-8 w-8 para h-9 w-9
+- ✅ Agora sempre visível em todas as telas (removido comportamento de aparecer apenas no hover em desktop)
+- ✅ Melhor usabilidade e acessibilidade
+
+**Tipografia no Modal:**
+- ✅ Adicionado título grande e estilizado no banner do modal
+- ✅ Tipografia responsiva: 3xl (mobile) até 6xl (desktop)
+- ✅ Sombras de texto duplas para melhor legibilidade sobre imagens
+- ✅ Posicionado na parte inferior do banner para não cobrir elementos importantes
+
+**Gênero Mistério Adicionado:**
+- ✅ Novo gênero "Mistério" (ID 9648) na seção Navegar
+- ✅ Ícone HelpCircle com gradiente violet-600 to purple-700
+- ✅ Adicionado consistentemente em BrowseOverlay e Home.tsx
+- ✅ Funciona em filtros e categorização automática
+
+**API Key do TMDB:**
+- ✅ Chave da API do TMDB configurada como secret do Replit
+- ✅ Sistema pronto para buscar metadados de filmes e séries
+
 ### Remoção do Sistema de Notificações e Melhorias de UI (October 30, 2025)
 
 **Sistema de Notificações Removido:**
