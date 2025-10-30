@@ -6,6 +6,27 @@ TavernaStream is a full-stack web application for streaming movies and series. I
 
 ## Recent Changes
 
+### Sistema de Notificações e Cronômetro Melhorado (October 30, 2025)
+
+**Notificações Nativas:**
+- ✅ Removidas configurações de push notifications (agora apenas notificações internas do site)
+- ✅ Sistema de notificações sincronizado com cronômetro de lançamentos
+- ✅ Notificações automáticas criadas quando conteúdo agendado é liberado
+- ✅ Verificação a cada 30 segundos se conteúdo está no catálogo
+
+**Cronômetro de Lançamentos:**
+- ✅ Verifica automaticamente se conteúdo está no catálogo
+- ✅ Mostra status diferenciado: "Agendado" vs "Bloqueado" vs "Disponível"
+- ✅ Cria notificação in-app quando contador chega a zero E conteúdo está no catálogo
+- ✅ Endpoint `/api/media/check/:id/:type` retorna informações de agendamento
+- ✅ Sincronização perfeita entre cronômetro e notificações automáticas
+
+**Detalhes Técnicos:**
+- `notification-tracker.ts` agora verifica `releaseConfig` a cada 30 segundos
+- `ReleaseCountdown.tsx` cria notificação toast quando tempo acaba
+- Endpoint `/api/media/check/:id/:type` retorna: `exists`, `isScheduled`, `releaseTimestamp`
+- Notificações in-app usando sistema de toast do shadcn/ui
+
 ### Progressive Web App (PWA) Implementation (October 29, 2025)
 
 **PWA Funcional:**
