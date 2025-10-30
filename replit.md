@@ -6,7 +6,7 @@ TavernaStream is a full-stack web application for streaming movies and series. I
 
 ## Recent Changes
 
-### Remoção do Sistema de Notificações (October 30, 2025)
+### Remoção do Sistema de Notificações e Melhorias de UI (October 30, 2025)
 
 **Sistema de Notificações Removido:**
 - ✅ Removido componente NotificationCenter do Header
@@ -17,16 +17,23 @@ TavernaStream is a full-stack web application for streaming movies and series. I
 - ✅ Removidos schemas de notificações do shared/schema.ts
 - ✅ Interface do usuário simplificada, focando apenas no conteúdo
 
+**Logo do Header Atualizado:**
+- ✅ Ícone Film (lucide-react) substituído pelo logo PNG do dragão vermelho
+- ✅ Usado `/icon-192.png` do diretório public
+- ✅ Mantém funcionalidade de navegação e hover effects
+
 **Cronômetro de Lançamentos Aprimorado:**
 - ✅ Quando o cronômetro zera, verifica automaticamente se o conteúdo está nos githubs
 - ✅ Se o conteúdo estiver disponível, mostra notificação via toast (shadcn/ui)
 - ✅ Sistema de verificação contínua a cada 30 segundos
 - ✅ Estados claros: "Agendado" vs "Bloqueado" vs "Disponível"
 
-**Botão X em "Continue Assistindo":**
-- ✅ Botão funcionando corretamente com z-index adequado
-- ✅ Visível em mobile (sempre) e desktop (no hover)
-- ✅ Previne propagação de eventos (stopPropagation)
+**Botão X em "Continue Assistindo" Corrigido:**
+- ✅ z-index aumentado para z-50 para garantir visibilidade
+- ✅ Sempre visível em mobile (opacity-100)
+- ✅ Aparece no hover em desktop (md:opacity-0 md:group-hover:opacity-100)
+- ✅ Previne propagação de eventos com stopPropagation e preventDefault
+- ✅ Efeito de hover com scale-110 e shadow-lg
 
 ### Sistema de Notificações e Cronômetro Melhorado (October 29, 2025) - DESCONTINUADO
 
