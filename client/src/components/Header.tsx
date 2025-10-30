@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Film, Search, Menu, Heart, Compass } from 'lucide-react';
+import { Search, Menu, Heart, Compass } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Link, useRoute } from 'wouter';
+import logoIcon from '/icon-192.png';
 
 interface HeaderProps {
   onSearch: (query: string) => void;
@@ -32,7 +33,7 @@ export function Header({ onSearch, onLogoClick, onMenuClick, onBrowseClick }: He
           className="flex items-center gap-2 hover-elevate active-elevate-2 rounded-md px-3 py-2 transition-transform"
           data-testid="button-logo"
         >
-          <Film className="w-8 h-8 text-primary" />
+          <img src={logoIcon} alt="Taverna Stream" className="w-8 h-8 object-contain" />
           <span className="text-xl md:text-2xl font-bold text-primary hidden sm:inline">
             Taverna Stream
           </span>
