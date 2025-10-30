@@ -197,6 +197,7 @@ export default function Home() {
       27: 'Terror',
       878: 'Ficção Científica',
       53: 'Suspense',
+      9648: 'Mistério',
       10759: 'Ação & Aventura',
     };
     return genreMap[genreId] || null;

@@ -86,7 +86,7 @@ export function ContinueWatchingCard({
         <Button
           variant="ghost"
           size="icon"
-          className="absolute top-2 right-2 z-50 h-8 w-8 bg-black/80 backdrop-blur-sm hover:bg-black/95 hover:scale-110 rounded-full opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-200 shadow-lg"
+          className="absolute top-2 right-2 z-50 h-9 w-9 bg-black/80 backdrop-blur-sm hover:bg-black/95 hover:scale-110 rounded-full opacity-100 transition-all duration-200 shadow-lg"
           onClick={(e) => {
             e.stopPropagation();
             e.preventDefault();
@@ -94,7 +94,7 @@ export function ContinueWatchingCard({
           }}
           data-testid={`button-remove-${media.tmdbId}`}
         >
-          <X className="w-4 h-4 text-white" />
+          <X className="w-5 h-5 text-white" />
         </Button>
       </div>
     </div>

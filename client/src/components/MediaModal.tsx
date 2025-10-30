@@ -97,6 +97,11 @@ export function MediaModal({
               className="w-full h-full object-cover rounded-t-lg"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-card via-card/60 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white drop-shadow-2xl" style={{ textShadow: '0 4px 12px rgba(0,0,0,0.8), 0 2px 4px rgba(0,0,0,0.6)' }}>
+                {title}
+              </h1>
+            </div>
           </div>
         )}
 

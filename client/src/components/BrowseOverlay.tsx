@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Loader2, Film, Tv, Swords, Laugh, Ghost, Heart, Drama, Sparkles, Rocket, Eye, Mic } from 'lucide-react';
+import { X, Loader2, Film, Tv, Swords, Laugh, Ghost, Heart, Drama, Sparkles, Rocket, Eye, Mic, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MediaCard } from './MediaCard';
 import { CategoryRow } from './CategoryRow';
@@ -45,6 +45,7 @@ export function BrowseOverlay({
     { id: 'action', label: 'Ação', icon: Swords, genreIds: [28, 10759], color: 'from-red-500 to-orange-500' },
     { id: 'comedy', label: 'Comédia', icon: Laugh, genreIds: [35], color: 'from-yellow-500 to-amber-500' },
     { id: 'horror', label: 'Terror', icon: Ghost, genreIds: [27], color: 'from-gray-700 to-black' },
+    { id: 'mystery', label: 'Mistério', icon: HelpCircle, genreIds: [9648], color: 'from-violet-600 to-purple-700' },
     { id: 'romance', label: 'Romance', icon: Heart, genreIds: [10749], color: 'from-pink-500 to-rose-500' },
     { id: 'drama', label: 'Drama', icon: Drama, genreIds: [18], color: 'from-indigo-500 to-purple-500' },
     { id: 'scifi', label: 'Ficção Científica', icon: Rocket, genreIds: [878], color: 'from-teal-500 to-emerald-500' },
@@ -88,6 +89,7 @@ export function BrowseOverlay({
       27: 'Terror',
       878: 'Ficção Científica',
       53: 'Suspense',
+      9648: 'Mistério',
       10749: 'Romance',
       10759: 'Ação & Aventura',
     };
