@@ -14,11 +14,13 @@ TavernaStream is a full-stack web application for streaming movies and series. I
 - ✅ Agora sempre visível em todas as telas (removido comportamento de aparecer apenas no hover em desktop)
 - ✅ Melhor usabilidade e acessibilidade
 
-**Tipografia no Modal:**
-- ✅ Adicionado título grande e estilizado no banner do modal
-- ✅ Tipografia responsiva: 3xl (mobile) até 6xl (desktop)
-- ✅ Sombras de texto duplas para melhor legibilidade sobre imagens
-- ✅ Posicionado na parte inferior do banner para não cobrir elementos importantes
+**Logos Oficiais no Modal (Tipografia Profissional):**
+- ✅ Sistema de busca de logos oficiais das obras via API do TMDB
+- ✅ Endpoint `/api/media/logo/:id/:type` que prioriza logos em português > inglês > qualquer outro
+- ✅ Logos exibidos no banner do modal com tamanho responsivo
+- ✅ Sombras aplicadas para melhor legibilidade sobre imagens
+- ✅ Se não houver logo disponível, o banner fica limpo (sem texto)
+- ✅ Suporte a múltiplos idiomas via parâmetro `include_image_language=pt,en,null`
 
 **Gênero Mistério Adicionado:**
 - ✅ Novo gênero "Mistério" (ID 9648) na seção Navegar
