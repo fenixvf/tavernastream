@@ -6,7 +6,29 @@ TavernaStream is a full-stack web application for streaming movies and series. I
 
 ## Recent Changes
 
-### Sistema de Notificações e Cronômetro Melhorado (October 30, 2025)
+### Remoção do Sistema de Notificações (October 30, 2025)
+
+**Sistema de Notificações Removido:**
+- ✅ Removido componente NotificationCenter do Header
+- ✅ Removida página AdminNotifications
+- ✅ Removidas todas as rotas de API relacionadas a notificações
+- ✅ Removidos métodos de storage relacionados a notificações
+- ✅ Removido notification-tracker.ts e sua integração no servidor
+- ✅ Removidos schemas de notificações do shared/schema.ts
+- ✅ Interface do usuário simplificada, focando apenas no conteúdo
+
+**Cronômetro de Lançamentos Aprimorado:**
+- ✅ Quando o cronômetro zera, verifica automaticamente se o conteúdo está nos githubs
+- ✅ Se o conteúdo estiver disponível, mostra notificação via toast (shadcn/ui)
+- ✅ Sistema de verificação contínua a cada 30 segundos
+- ✅ Estados claros: "Agendado" vs "Bloqueado" vs "Disponível"
+
+**Botão X em "Continue Assistindo":**
+- ✅ Botão funcionando corretamente com z-index adequado
+- ✅ Visível em mobile (sempre) e desktop (no hover)
+- ✅ Previne propagação de eventos (stopPropagation)
+
+### Sistema de Notificações e Cronômetro Melhorado (October 29, 2025) - DESCONTINUADO
 
 **Notificações Nativas:**
 - ✅ Removidas configurações de push notifications (agora apenas notificações internas do site)
