@@ -92,12 +92,13 @@ export function ReleaseCountdown({
               if (response.ok) {
                 const data = await response.json();
                 if (data.exists) {
+                  setExistsInCatalog(true);
                   setShowAvailableMessage(true);
                   localStorage.setItem(`${releaseKey}_showMessage`, 'true');
                   localStorage.setItem(`${releaseKey}_timestamp`, now.toString());
                   
                   toast({
-                    title: "🎉 Novo conteúdo liberado!",
+                    title: "🎉 Conteúdo liberado!",
                     description: `${targetTitle} já está disponível no catálogo!`,
                     duration: 10000,
                   });

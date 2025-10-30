@@ -512,14 +512,6 @@ export default function Home() {
         onSearch={handleSearch}
         onLogoClick={handleLogoClick}
         onBrowseClick={() => setIsBrowseOpen(true)}
-        onNotificationClick={(tmdbId, mediaType) => {
-          if (tmdbId && mediaType) {
-            const media = allMediaCombined?.find(m => m.tmdbId === tmdbId && m.mediaType === mediaType);
-            if (media) {
-              handleMediaClick(media);
-            }
-          }
-        }}
       />
 
       {/* Main Content */}
