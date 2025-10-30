@@ -5,7 +5,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Home from "@/pages/Home";
 import MyListPage from "@/pages/MyListPage";
-import AdminNotifications from "@/pages/AdminNotifications";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -13,7 +12,6 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/minha-lista" component={MyListPage} />
-      <Route path="/admin/notifications" component={AdminNotifications} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -3,17 +3,15 @@ import { Film, Search, Menu, Heart, Compass } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Link, useRoute } from 'wouter';
-import { NotificationCenter } from '@/components/NotificationCenter';
 
 interface HeaderProps {
   onSearch: (query: string) => void;
   onLogoClick: () => void;
   onMenuClick?: () => void;
   onBrowseClick?: () => void;
-  onNotificationClick?: (tmdbId?: number, mediaType?: 'movie' | 'tv') => void;
 }
 
-export function Header({ onSearch, onLogoClick, onMenuClick, onBrowseClick, onNotificationClick }: HeaderProps) {
+export function Header({ onSearch, onLogoClick, onMenuClick, onBrowseClick }: HeaderProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [isMyListPage] = useRoute('/minha-lista');
@@ -116,8 +114,6 @@ export function Header({ onSearch, onLogoClick, onMenuClick, onBrowseClick, onNo
               <Search className="w-5 h-5" />
             </Button>
           </form>
-          
-          <NotificationCenter onNotificationClick={onNotificationClick} />
         </div>
       </div>
     </header>
