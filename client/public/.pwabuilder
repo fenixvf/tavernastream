@@ -1,0 +1,80 @@
+{
+  "packageId": "com.tavernastream.app",
+  "name": "Taverna Stream",
+  "launcherName": "Taverna",
+  "host": "https://tavernastream.onrender.com",
+  "startUrl": "/",
+  "iconUrl": "https://tavernastream.onrender.com/icon-512.png",
+  "maskableIconUrl": null,
+  "monochromeIconUrl": null,
+  "appVersion": "1.0.0",
+  "appVersionCode": 1,
+  "themeColor": "#dc2626",
+  "backgroundColor": "#000000",
+  "navigationColor": "#000000",
+  "navigationColorDark": "#000000",
+  "navigationDividerColor": "#dc2626",
+  "navigationDividerColorDark": "#dc2626",
+  "display": "standalone",
+  "orientation": "portrait",
+  "enableNotifications": true,
+  "enableSiteSettingsShortcut": true,
+  "fallbackType": "customtabs",
+  "splashScreenFadeOutDuration": 300,
+  "webManifestUrl": "https://tavernastream.onrender.com/manifest.json",
+  "additionalTrustedOrigins": [],
+  "isChromeOSOnly": false,
+  "includeSourceCode": false,
+  "features": {
+    "locationDelegation": {
+      "enabled": false
+    },
+    "playBilling": {
+      "enabled": false
+    }
+  },
+  "shortcuts": [
+    {
+      "name": "Início",
+      "short_name": "Início",
+      "url": "/",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Navegar",
+      "short_name": "Navegar",
+      "url": "/browse",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Minha Lista",
+      "short_name": "Lista",
+      "url": "/mylist",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "signing": {
+    "file": null,
+    "alias": null,
+    "storePassword": null,
+    "keyPassword": null
+  }
+}

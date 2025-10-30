@@ -1,8 +1,9 @@
 {
+  "id": "/",
   "name": "Taverna Stream",
   "short_name": "Taverna",
   "description": "Assista aos melhores filmes, séries e animes online. Plataforma de streaming com conteúdo de alta qualidade.",
-  "start_url": "tavernastream.onrender.com",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#dc2626",
