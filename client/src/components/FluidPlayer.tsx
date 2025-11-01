@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { Loader2 } from 'lucide-react';
 import fluidPlayer from 'fluid-player';
 
@@ -24,8 +24,22 @@ export function FluidPlayer({ driveUrl, title, onTimeUpdate, resumeTime = 0 }: F
   const playerInstanceRef = useRef<any>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const videoIdRef = useRef<string>(`fluid-player-${Date.now()}`);
+  const onTimeUpdateRef = useRef(onTimeUpdate);
 
   useEffect(() => {
+    onTimeUpdateRef.current = onTimeUpdate;
+  }, [onTimeUpdate]);
+
+  const handleTimeUpdate = useCallback(() => {
+    const videoElement = videoRef.current;
+    if (onTimeUpdateRef.current && videoElement && videoElement.duration) {
+      onTimeUpdateRef.current(videoElement.currentTime, videoElement.duration);
+    }
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
     const fetchStreamUrl = async () => {
       try {
         setIsLoading(true);
@@ -44,118 +58,139 @@ export function FluidPlayer({ driveUrl, title, onTimeUpdate, resumeTime = 0 }: F
         }
 
         const data = await response.json();
-        setStreamData(data);
+        
+        if (!cancelled) {
+          setStreamData(data);
+        }
       } catch (err) {
         console.error('Error fetching stream URL:', err);
-        setError(true);
-        setIsLoading(false);
+        if (!cancelled) {
+          setError(true);
+          setIsLoading(false);
+        }
       }
     };
 
     fetchStreamUrl();
+
+    return () => {
+      cancelled = true;
+    };
   }, [driveUrl]);
 
   useEffect(() => {
-    if (!streamData) return;
-
-    if (streamData.fallback) {
-      setIsLoading(false);
+    if (!streamData || streamData.fallback) {
       return;
     }
 
-    if (!videoRef.current) return;
-
     const videoElement = videoRef.current;
+    if (!videoElement) return;
+
     const videoId = videoIdRef.current;
+    let mounted = true;
 
-    try {
-      if (playerInstanceRef.current) {
-        playerInstanceRef.current.destroy();
-        playerInstanceRef.current = null;
-      }
-
-      playerInstanceRef.current = fluidPlayer(videoId, {
-        layoutControls: {
-          fillToContainer: true,
-          autoPlay: false,
-          mute: false,
-          loop: false,
-          playbackRateEnabled: true,
-          allowDownload: false,
-          playPauseAnimation: true,
-          persistentSettings: {
-            volume: true,
-            quality: true,
-            speed: true,
-            theatre: true
-          }
-        }
-      });
-
-      const handleLoadedMetadata = () => {
-        setIsLoading(false);
-        setError(false);
-        
-        if (resumeTime && resumeTime > 0 && videoElement.duration) {
-          videoElement.currentTime = resumeTime;
-        }
-      };
-
-      const handleError = () => {
-        setIsLoading(false);
-        setError(true);
-      };
-
-      const handleTimeUpdate = () => {
-        if (onTimeUpdate && videoElement.duration) {
-          onTimeUpdate(videoElement.currentTime, videoElement.duration);
-        }
-      };
-
-      videoElement.addEventListener('loadedmetadata', handleLoadedMetadata);
-      videoElement.addEventListener('error', handleError);
-      videoElement.addEventListener('timeupdate', handleTimeUpdate);
-
-      if (progressIntervalRef.current) {
-        clearInterval(progressIntervalRef.current);
-      }
-
-      progressIntervalRef.current = setInterval(() => {
-        if (onTimeUpdate && videoElement.duration && !videoElement.paused) {
-          onTimeUpdate(videoElement.currentTime, videoElement.duration);
-        }
-      }, 5000);
-
-      return () => {
-        videoElement.removeEventListener('loadedmetadata', handleLoadedMetadata);
-        videoElement.removeEventListener('error', handleError);
-        videoElement.removeEventListener('timeupdate', handleTimeUpdate);
-        
-        if (progressIntervalRef.current) {
-          clearInterval(progressIntervalRef.current);
-          progressIntervalRef.current = null;
-        }
-        
+    const initPlayer = () => {
+      try {
         if (playerInstanceRef.current) {
           try {
             playerInstanceRef.current.destroy();
           } catch (e) {
-            console.error('Error destroying player:', e);
+            console.warn('Error destroying old player:', e);
           }
           playerInstanceRef.current = null;
         }
-      };
-    } catch (err) {
-      console.error('Error initializing Fluid Player:', err);
-      setError(true);
-      setIsLoading(false);
-    }
-  }, [streamData, onTimeUpdate, resumeTime]);
+
+        playerInstanceRef.current = fluidPlayer(videoId, {
+          layoutControls: {
+            fillToContainer: true,
+            autoPlay: false,
+            mute: false,
+            loop: false,
+            playbackRateEnabled: true,
+            allowDownload: false,
+            playPauseAnimation: true,
+            persistentSettings: {
+              volume: true,
+              quality: true,
+              speed: true,
+              theatre: true
+            }
+          }
+        });
+
+        const handleLoadedMetadata = () => {
+          if (mounted) {
+            setIsLoading(false);
+            setError(false);
+            
+            if (resumeTime && resumeTime > 0 && videoElement.duration) {
+              videoElement.currentTime = resumeTime;
+            }
+          }
+        };
+
+        const handleError = () => {
+          if (mounted) {
+            setIsLoading(false);
+            setError(true);
+          }
+        };
+
+        videoElement.addEventListener('loadedmetadata', handleLoadedMetadata);
+        videoElement.addEventListener('error', handleError);
+        videoElement.addEventListener('timeupdate', handleTimeUpdate);
+
+        if (progressIntervalRef.current) {
+          clearInterval(progressIntervalRef.current);
+        }
+
+        progressIntervalRef.current = setInterval(() => {
+          if (mounted && videoElement.duration && !videoElement.paused) {
+            handleTimeUpdate();
+          }
+        }, 5000);
+      } catch (err) {
+        console.error('Error initializing Fluid Player:', err);
+        if (mounted) {
+          setError(true);
+          setIsLoading(false);
+        }
+      }
+    };
+
+    const timeout = setTimeout(initPlayer, 100);
+
+    return () => {
+      mounted = false;
+      clearTimeout(timeout);
+
+      if (videoElement) {
+        videoElement.removeEventListener('loadedmetadata', () => {});
+        videoElement.removeEventListener('error', () => {});
+        videoElement.removeEventListener('timeupdate', handleTimeUpdate);
+      }
+      
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
+      }
+      
+      if (playerInstanceRef.current) {
+        try {
+          playerInstanceRef.current.destroy();
+        } catch (e) {
+          console.warn('Error destroying player on cleanup:', e);
+        }
+        playerInstanceRef.current = null;
+      }
+    };
+  }, [streamData, resumeTime, handleTimeUpdate]);
 
   useEffect(() => {
-    if (!streamData?.fallback || !iframeRef.current) return;
+    if (!streamData || !streamData.fallback) return;
 
     const iframe = iframeRef.current;
+    if (!iframe) return;
 
     const handleLoad = () => {
       setIsLoading(false);
@@ -171,8 +206,10 @@ export function FluidPlayer({ driveUrl, title, onTimeUpdate, resumeTime = 0 }: F
     iframe.addEventListener('error', handleError);
 
     return () => {
-      iframe.removeEventListener('load', handleLoad);
-      iframe.removeEventListener('error', handleError);
+      if (iframe) {
+        iframe.removeEventListener('load', handleLoad);
+        iframe.removeEventListener('error', handleError);
+      }
     };
   }, [streamData]);
 
