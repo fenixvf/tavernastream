@@ -1,10 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { X, AlertTriangle, SkipBack, SkipForward, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import type { PlayerType } from '@shared/schema';
 import { useWatchProgress } from '@/hooks/use-watch-progress';
+import { FluidPlayer } from '@/components/FluidPlayer';
 
 interface PlayerOverlayProps {
   isOpen: boolean;
@@ -49,7 +50,10 @@ export function PlayerOverlay({
   const [showAdWarning, setShowAdWarning] = useState(false);
   const [showOverloadWarning, setShowOverloadWarning] = useState(false);
   const [watchStartTime, setWatchStartTime] = useState<number | null>(null);
+  const [currentVideoTime, setCurrentVideoTime] = useState<number>(0);
+  const [videoDuration, setVideoDuration] = useState<number>(0);
   const { saveProgress } = useWatchProgress();
+  const lastSaveTimeRef = useRef<number>(0);
 
   // Auto-selecionar PlayerFlix quando autoPlayPlayerFlix é true
   // OU auto-selecionar Drive quando é fandub mas há driveUrl
@@ -64,19 +68,16 @@ export function PlayerOverlay({
     }
   }, [isOpen, autoPlayPlayerFlix, isFanDub, driveUrl]);
 
-  const saveCurrentProgress = useCallback((forceCurrentTime?: number) => {
-    if (watchStartTime && selectedPlayer) {
-      const watchDuration = Date.now() - watchStartTime;
-      const watchedSeconds = watchDuration / 1000;
+  const handleVideoTimeUpdate = useCallback((currentTime: number, duration: number) => {
+    setCurrentVideoTime(currentTime);
+    setVideoDuration(duration);
+    
+    const now = Date.now();
+    if (now - lastSaveTimeRef.current > 10000) {
+      lastSaveTimeRef.current = now;
       
-      // Usar tempo fornecido ou calcular baseado na duração da sessão
-      const currentTime = forceCurrentTime !== undefined ? forceCurrentTime : Math.floor(watchedSeconds);
-      
-      // Salvar progresso se assistiu pelo menos 30 segundos
-      if (currentTime >= 30 || forceCurrentTime !== undefined) {
-        // Estimar duração total baseado no tipo de mídia
-        const estimatedDuration = mediaType === 'movie' ? 7200 : 2400; // 2h para filmes, 40min para episódios
-        const progressPercent = Math.min(95, (currentTime / estimatedDuration) * 100);
+      if (currentTime >= 30 && duration > 0) {
+        const progressPercent = Math.min(95, (currentTime / duration) * 100);
         const isCompleted = progressPercent >= 80;
         
         saveProgress({
@@ -86,9 +87,9 @@ export function PlayerOverlay({
           posterPath: posterPath || null,
           backdropPath: backdropPath || null,
           progress: isCompleted ? 100 : progressPercent,
-          currentTime: currentTime, // Tempo real do vídeo em segundos
-          totalDuration: estimatedDuration, // Duração estimada em segundos
-          duration: watchDuration, // Duração da sessão em ms (compatibilidade)
+          currentTime: Math.floor(currentTime),
+          totalDuration: Math.floor(duration),
+          duration: now - (watchStartTime || now),
           seasonNumber,
           episodeNumber,
           episodeName,
@@ -96,7 +97,48 @@ export function PlayerOverlay({
         });
       }
     }
-  }, [watchStartTime, selectedPlayer, tmdbId, mediaType, title, posterPath, backdropPath, seasonNumber, episodeNumber, episodeName, saveProgress]);
+  }, [tmdbId, mediaType, title, posterPath, backdropPath, seasonNumber, episodeNumber, episodeName, saveProgress, watchStartTime]);
+
+  const saveCurrentProgress = useCallback((forceCurrentTime?: number) => {
+    if (watchStartTime && selectedPlayer) {
+      const watchDuration = Date.now() - watchStartTime;
+      
+      let currentTime: number;
+      let totalDuration: number;
+      
+      if (selectedPlayer === 'drive' && videoDuration > 0) {
+        currentTime = Math.floor(currentVideoTime);
+        totalDuration = Math.floor(videoDuration);
+      } else {
+        const watchedSeconds = watchDuration / 1000;
+        currentTime = forceCurrentTime !== undefined ? forceCurrentTime : Math.floor(watchedSeconds);
+        totalDuration = mediaType === 'movie' ? 7200 : 2400;
+      }
+      
+      if (currentTime >= 30 || forceCurrentTime !== undefined) {
+        const progressPercent = totalDuration > 0 
+          ? Math.min(95, (currentTime / totalDuration) * 100)
+          : 0;
+        const isCompleted = progressPercent >= 80;
+        
+        saveProgress({
+          tmdbId,
+          mediaType,
+          title,
+          posterPath: posterPath || null,
+          backdropPath: backdropPath || null,
+          progress: isCompleted ? 100 : progressPercent,
+          currentTime: currentTime,
+          totalDuration: totalDuration,
+          duration: watchDuration,
+          seasonNumber,
+          episodeNumber,
+          episodeName,
+          completed: isCompleted,
+        });
+      }
+    }
+  }, [watchStartTime, selectedPlayer, tmdbId, mediaType, title, posterPath, backdropPath, seasonNumber, episodeNumber, episodeName, saveProgress, currentVideoTime, videoDuration]);
 
   const handlePlayerSelect = (playerType: PlayerType) => {
     if (playerType === 'playerflix') {
@@ -329,14 +371,14 @@ export function PlayerOverlay({
                       />
                     )}
                     {selectedPlayer === 'drive' && driveUrl && (
-                      <iframe
-                        src={driveUrl}
-                        className="absolute inset-0 w-full h-full"
-                        allowFullScreen
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        onError={handleDriveError}
-                        data-testid="iframe-drive"
-                      />
+                      <div className="absolute inset-0 w-full h-full">
+                        <FluidPlayer
+                          driveUrl={driveUrl}
+                          title={episodeTitle}
+                          onTimeUpdate={handleVideoTimeUpdate}
+                          resumeTime={resumeTime}
+                        />
+                      </div>
                     )}
                   </div>
                 </div>
