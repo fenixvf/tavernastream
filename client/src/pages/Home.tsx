@@ -15,6 +15,7 @@ import { ReleaseCountdown } from '@/components/ReleaseCountdown';
 import { Loader2 } from 'lucide-react';
 import type { MediaItem, TMDBDetails, SeriesBinData, TMDBEpisode } from '@shared/schema';
 import { useWatchProgress } from '@/hooks/use-watch-progress';
+import { useNewContent } from '@/hooks/use-new-content';
 import { releaseConfig } from '@/lib/releaseConfig';
 import { featuredConfig } from '@/lib/featuredConfig';
 import { fanDubConfig } from '@/lib/fanDubConfig';
@@ -46,6 +47,7 @@ export default function Home() {
   } | null>(null);
 
   const { getContinueWatching, watchProgress, getProgress, removeFromContinueWatching, clearAllProgress } = useWatchProgress();
+  const { updateSeenContent, getNewContent } = useNewContent();
 
   // Fetch all media (movies + series) - atualiza a cada 30 segundos
   const { data: allMedia, isLoading: isLoadingMedia } = useQuery<MediaItem[]>({
@@ -132,9 +134,28 @@ export default function Home() {
     })
     .filter(Boolean) as MediaItem[];
 
-  // Get new releases - balanceado entre filmes, séries E fandubs (incluindo fandubs agora!)
+  // Get new releases - detecta automaticamente novos conteúdos adicionados
   const newReleases = (() => {
     if (!allMediaCombined) return [];
+    
+    const newContent = getNewContent(allMediaCombined);
+    
+    if (newContent.length > 0) {
+      const newMovies = newContent.filter(m => m.mediaType === 'movie' && !m.genres?.includes(-1));
+      const newSeries = newContent.filter(m => m.mediaType === 'tv' && !m.genres?.includes(-1));
+      const newFandubs = newContent.filter(m => m.genres?.includes(-1));
+      
+      const balanced: MediaItem[] = [];
+      const maxLength = Math.max(newMovies.length, newSeries.length, newFandubs.length);
+      
+      for (let i = 0; i < maxLength; i++) {
+        if (newMovies[i]) balanced.push(newMovies[i]);
+        if (newSeries[i]) balanced.push(newSeries[i]);
+        if (newFandubs[i]) balanced.push(newFandubs[i]);
+      }
+      
+      return balanced.slice(0, 20);
+    }
     
     const recentMovies = allMediaCombined
       .filter(m => m.mediaType === 'movie' && !m.genres?.includes(-1))
@@ -485,6 +506,12 @@ export default function Home() {
       clearAllProgress();
     }
   };
+
+  useEffect(() => {
+    if (allMediaCombined && allMediaCombined.length > 0) {
+      updateSeenContent(allMediaCombined);
+    }
+  }, [allMediaCombined]);
 
   useEffect(() => {
     if (mobileTab === 'search') {
