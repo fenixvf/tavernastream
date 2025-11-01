@@ -45,7 +45,7 @@ export default function Home() {
     isFanDub?: boolean;
   } | null>(null);
 
-  const { getContinueWatching, watchProgress, getProgress, removeFromContinueWatching } = useWatchProgress();
+  const { getContinueWatching, watchProgress, getProgress, removeFromContinueWatching, clearAllProgress } = useWatchProgress();
 
   // Fetch all media (movies + series) - atualiza a cada 30 segundos
   const { data: allMedia, isLoading: isLoadingMedia } = useQuery<MediaItem[]>({
@@ -480,6 +480,12 @@ export default function Home() {
     }
   };
 
+  const handleClearAllProgress = () => {
+    if (window.confirm('Deseja realmente limpar todo o histórico de "Continuar Assistindo"?')) {
+      clearAllProgress();
+    }
+  };
+
   useEffect(() => {
     if (mobileTab === 'search') {
       setIsSearchOpen(true);
@@ -547,6 +553,7 @@ export default function Home() {
               showProgress={true}
               onRemove={handleRemoveFromContinueWatching}
               studioNameMap={studioNameMap}
+              onClearAll={handleClearAllProgress}
             />
           )}
 

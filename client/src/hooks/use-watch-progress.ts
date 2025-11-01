@@ -129,6 +129,11 @@ export function useWatchProgress() {
       .slice(0, 10);
   }, [watchProgress]);
 
+  const clearAllProgress = useCallback(() => {
+    setWatchProgress([]);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
+  }, []);
+
   return {
     watchProgress,
     saveProgress,
@@ -136,5 +141,6 @@ export function useWatchProgress() {
     clearProgress,
     getContinueWatching,
     removeFromContinueWatching,
+    clearAllProgress,
   };
 }

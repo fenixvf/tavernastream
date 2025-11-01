@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { ChevronLeft, ChevronRight, ChevronRightCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronRightCircle, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MediaCard } from './MediaCard';
 import { ContinueWatchingCard } from './ContinueWatchingCard';
@@ -16,9 +16,10 @@ interface CategoryRowProps {
   onRemove?: (media: MediaItem) => void;
   onBrowseClick?: () => void;
   studioNameMap?: Record<number, string>;
+  onClearAll?: () => void;
 }
 
-export function CategoryRow({ title, media, onMediaClick, onAddToList, myListIds, allProgress, showProgress = false, onRemove, onBrowseClick, studioNameMap = {} }: CategoryRowProps) {
+export function CategoryRow({ title, media, onMediaClick, onAddToList, myListIds, allProgress, showProgress = false, onRemove, onBrowseClick, studioNameMap = {}, onClearAll }: CategoryRowProps) {
   const isContinueWatching = title === "Continuar Assistindo";
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -41,18 +42,32 @@ export function CategoryRow({ title, media, onMediaClick, onAddToList, myListIds
         <h2 className="text-2xl md:text-3xl font-bold text-primary" data-testid={`text-category-${title}`}>
           {title}
         </h2>
-        {onBrowseClick && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
-            onClick={onBrowseClick}
-            data-testid={`button-see-more-${title}`}
-          >
-            Ver Mais
-            <ChevronRightCircle className="w-4 h-4" />
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {isContinueWatching && onClearAll && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground hover:text-red-500 transition-colors flex items-center gap-1"
+              onClick={onClearAll}
+              data-testid="button-clear-continue-watching"
+            >
+              <Trash2 className="w-4 h-4" />
+              <span className="hidden sm:inline">Limpar</span>
+            </Button>
+          )}
+          {onBrowseClick && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
+              onClick={onBrowseClick}
+              data-testid={`button-see-more-${title}`}
+            >
+              Ver Mais
+              <ChevronRightCircle className="w-4 h-4" />
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Scroll Container */}
