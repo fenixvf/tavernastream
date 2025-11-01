@@ -608,6 +608,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/drive/get-stream-url", async (req, res) => {
+    try {
+      const { driveUrl } = req.body;
+      
+      if (!driveUrl || typeof driveUrl !== 'string') {
+        return res.status(400).json({ error: 'Drive URL is required' });
+      }
+
+      const fileIdMatch = driveUrl.match(/\/file\/d\/([^/]+)/);
+      const idMatch = driveUrl.match(/[?&]id=([^&]+)/);
+      const fileId = fileIdMatch?.[1] || idMatch?.[1];
+      
+      if (!fileId) {
+        return res.status(400).json({ error: 'Could not extract file ID from Drive URL' });
+      }
+
+      const apiKey = process.env.GOOGLE_API_KEY;
+      
+      if (!apiKey) {
+        console.error('GOOGLE_API_KEY not configured');
+        return res.status(500).json({ error: 'Google API key not configured' });
+      }
+
+      const response = await fetch(
+        `https://www.googleapis.com/drive/v3/files/${fileId}?fields=id,name,mimeType,size,webContentLink&key=${apiKey}`
+      );
+
+      if (!response.ok) {
+        console.error(`Google Drive API error: ${response.status} ${response.statusText}`);
+        const embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+        return res.json({ 
+          streamUrl: embedUrl,
+          fallback: true,
+          fileId
+        });
+      }
+
+      const fileData = await response.json();
+      
+      const streamUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${apiKey}`;
+      
+      res.json({
+        streamUrl,
+        fileId,
+        fileName: fileData.name,
+        mimeType: fileData.mimeType,
+        size: fileData.size,
+        fallback: false
+      });
+    } catch (error) {
+      console.error('Error getting Drive stream URL:', error);
+      res.status(500).json({ error: 'Failed to get stream URL' });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
