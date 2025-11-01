@@ -2,166 +2,7 @@
 
 ## Overview
 
-TavernaStream is a full-stack web application for streaming movies and series. It integrates data from The Movie Database (TMDB) with video URLs stored in Firebase Realtime Database. The platform offers a rich media catalog, a versatile video player, progress tracking, "New Releases," user-specific watchlists, and real-time search, all within a responsive UI. The project aims to deliver a seamless and engaging streaming service, including unique features like an automatic fan dubbing system and persistent release countdowns.
-
-## Recent Changes
-
-### Melhorias de UI e UX - Fase 2 (October 30, 2025)
-
-**Botão de Remoção em "Continue Assistindo":**
-- ✅ Ícone X aumentado de w-4 h-4 para w-5 h-5
-- ✅ Botão aumentado de h-8 w-8 para h-9 w-9
-- ✅ Agora sempre visível em todas as telas (removido comportamento de aparecer apenas no hover em desktop)
-- ✅ Melhor usabilidade e acessibilidade
-
-**Logos Oficiais no Modal (Tipografia Profissional):**
-- ✅ Sistema de busca de logos oficiais das obras via API do TMDB
-- ✅ Endpoint `/api/media/logo/:id/:type` que prioriza logos em português > inglês > qualquer outro
-- ✅ Logos exibidos no banner do modal com tamanho responsivo
-- ✅ Sombras aplicadas para melhor legibilidade sobre imagens
-- ✅ Se não houver logo disponível, o banner fica limpo (sem texto)
-- ✅ Suporte a múltiplos idiomas via parâmetro `include_image_language=pt,en,null`
-
-**Gênero Mistério Adicionado:**
-- ✅ Novo gênero "Mistério" (ID 9648) na seção Navegar
-- ✅ Ícone HelpCircle com gradiente violet-600 to purple-700
-- ✅ Adicionado consistentemente em BrowseOverlay e Home.tsx
-- ✅ Funciona em filtros e categorização automática
-
-**API Key do TMDB:**
-- ✅ Chave da API do TMDB configurada como secret do Replit
-- ✅ Sistema pronto para buscar metadados de filmes e séries
-
-### Remoção do Sistema de Notificações e Melhorias de UI (October 30, 2025)
-
-**Sistema de Notificações Removido:**
-- ✅ Removido componente NotificationCenter do Header
-- ✅ Removida página AdminNotifications
-- ✅ Removidas todas as rotas de API relacionadas a notificações
-- ✅ Removidos métodos de storage relacionados a notificações
-- ✅ Removido notification-tracker.ts e sua integração no servidor
-- ✅ Removidos schemas de notificações do shared/schema.ts
-- ✅ Interface do usuário simplificada, focando apenas no conteúdo
-
-**Logo do Header Atualizado:**
-- ✅ Ícone Film (lucide-react) substituído pelo logo PNG do dragão vermelho
-- ✅ Usado `/icon-192.png` do diretório public
-- ✅ Mantém funcionalidade de navegação e hover effects
-
-**Cronômetro de Lançamentos Aprimorado:**
-- ✅ Quando o cronômetro zera, verifica automaticamente se o conteúdo está nos githubs
-- ✅ Se o conteúdo estiver disponível, mostra notificação via toast (shadcn/ui)
-- ✅ Sistema de verificação contínua a cada 30 segundos
-- ✅ Estados claros: "Agendado" vs "Bloqueado" vs "Disponível"
-
-**Botão X em "Continue Assistindo" Corrigido:**
-- ✅ z-index aumentado para z-50 para garantir visibilidade
-- ✅ Sempre visível em mobile (opacity-100)
-- ✅ Aparece no hover em desktop (md:opacity-0 md:group-hover:opacity-100)
-- ✅ Previne propagação de eventos com stopPropagation e preventDefault
-- ✅ Efeito de hover com scale-110 e shadow-lg
-
-### Sistema de Notificações e Cronômetro Melhorado (October 29, 2025) - DESCONTINUADO
-
-**Notificações Nativas:**
-- ✅ Removidas configurações de push notifications (agora apenas notificações internas do site)
-- ✅ Sistema de notificações sincronizado com cronômetro de lançamentos
-- ✅ Notificações automáticas criadas quando conteúdo agendado é liberado
-- ✅ Verificação a cada 30 segundos se conteúdo está no catálogo
-
-**Cronômetro de Lançamentos:**
-- ✅ Verifica automaticamente se conteúdo está no catálogo
-- ✅ Mostra status diferenciado: "Agendado" vs "Bloqueado" vs "Disponível"
-- ✅ Cria notificação in-app quando contador chega a zero E conteúdo está no catálogo
-- ✅ Endpoint `/api/media/check/:id/:type` retorna informações de agendamento
-- ✅ Sincronização perfeita entre cronômetro e notificações automáticas
-
-**Detalhes Técnicos:**
-- `notification-tracker.ts` agora verifica `releaseConfig` a cada 30 segundos
-- `ReleaseCountdown.tsx` cria notificação toast quando tempo acaba
-- Endpoint `/api/media/check/:id/:type` retorna: `exists`, `isScheduled`, `releaseTimestamp`
-- Notificações in-app usando sistema de toast do shadcn/ui
-
-### Progressive Web App (PWA) Implementation (October 29, 2025)
-
-**PWA Funcional:**
-- ✅ Aplicação transformada em Progressive Web App completa
-- ✅ Manifest.json configurado com nome, ícones, cores e shortcuts
-- ✅ Service Worker com estratégia network-first para melhor performance
-- ✅ Funcionalidade offline para recursos já visitados
-- ✅ Ícone personalizado do dragão vermelho (logo Taverna Stream)
-- ✅ Instalável em dispositivos móveis e desktop
-- ✅ Suporte para iOS (apple-touch-icon) e Android
-- ✅ Revisado e aprovado pelo arquiteto para produção
-
-**Detalhes Técnicos:**
-- Service worker implementa network-first com fallback para cache
-- Precache de index.html e manifest.json durante instalação
-- Cache dinâmico de assets (JS, CSS, imagens) durante navegação
-- Requisições de API ignoradas do cache para dados sempre atualizados
-- Ícones em 192x192 e 512x512 pixels para diferentes dispositivos
-- Theme color #dc2626 (vermelho Taverna) para UI nativa
-- Shortcuts configurados para Início, Navegar e Minha Lista
-
-### UI/UX Improvements & Fan Dubbing Enhancements (October 29, 2025)
-
-**Correções Implementadas:**
-- ✅ Removida duplicação da categoria "Fã Dublagem" - agora aparece apenas uma vez, abaixo do Featured Banner
-- ✅ Fandubs excluídos da seção "Novidades" e de categorias por gênero para evitar duplicação
-- ✅ Nome do estúdio aparece em vermelho ao lado do título nas obras de fandub
-- ✅ Selo "FANDUB" adicionado ao canto superior esquerdo dos posters de fandub
-- ✅ Limite de 20 itens por categoria na tela inicial para melhor performance e UX
-- ✅ Botão X para remover itens do "Continue Assistindo" funcionando corretamente
-- ✅ Corrigido bug crítico: séries normais agora mostram ambos os players (PlayerFlix e Drive) corretamente
-
-**Detalhes Técnicos:**
-- Criado `studioNameMap` no Home.tsx para mapear IDs de obras com nomes de estúdios
-- MediaCard agora aceita prop `studioName` e detecta fandubs via `genres.includes(-1)`
-- Filtros aplicados em `newReleases` e `categorizeMedia` para excluir itens com genre ID -1
-- Todas as categorias (incluindo "Fã Dublagem") limitadas a 20 itens via `.slice(0, 20)`
-- CategoryRow atualizado para passar `studioNameMap` aos MediaCards
-- **Player Detection Fix**: PlayerOverlay agora usa prop `isFanDub` baseada no `genres.includes(-1)` intrínseco do media, eliminando condições de corrida com `fanDubConfig`
-- Séries normais exibem ambos os players; fandubs apenas Drive (Player 2)
-
-### Fan Dubbing System Updates (October 29, 2025)
-
-**Correções Anteriores:**
-- ✅ Sistema de ícones dinâmicos para botão de estúdio: detecta automaticamente Instagram, YouTube, Twitter/X, Facebook, TikTok
-- ✅ Filtro de episódios para fandubs: mostra apenas episódios com links de incorporação disponíveis no GitHub
-- ✅ Novo endpoint `/api/fan-dub/tv/:id/episodes` para buscar estrutura de episódios do GitHub
-- ✅ Player 2 exclusivo para fandubs: funciona apenas com links de incorporação do Drive
-
-**Detalhes Técnicos Anteriores:**
-- Criado `client/src/lib/socialIcons.tsx` com função `detectSocialPlatform()` e componente `SocialIcon`
-- Atualizado `MediaModal` para buscar dados de episódios do GitHub e filtrar apenas os disponíveis
-- Sistema identifica fandubs pelo genre ID -1 e ajusta comportamento automaticamente
-
-### Release Countdown & Fan Dubbing System Fixes (October 28, 2025)
-
-**Cronômetro Corrigido (ATUALIZAÇÃO FINAL):**
-- ✅ Resolvido problema definitivo de reset ao atualizar página
-- Mudado de `Date.now() + 24h` para timestamp fixo em `releaseConfig.ts`
-- Agora usa `new Date('2025-10-29T15:00:00').getTime()` como exemplo
-- Timer nunca mais reinicia, continua contando corretamente após qualquer reload
-- Estados `isReleased` e `showAvailableMessage` funcionam corretamente
-- Para adicionar novos countdowns, basta adicionar itens no array `releaseConfig.items`
-
-**Sistema de Fandub Corrigido (ATUALIZAÇÃO FINAL):**
-- ✅ Integração completa com sistema de navegação e categorias
-- Itens de fandub agora recebem genre ID `-1` no backend (`/api/media/fandub`)
-- Criada categoria "Fã Dublagem" na página inicial que exibe todos os itens do `fanDubConfig`
-- Filtro "Fã Dublagem" no Browse funciona corretamente (genreIds: [-1])
-- Implementado `allMediaCombined` que mescla `allMedia` + `fanDubMedia` sem duplicatas
-- Todos os componentes (Continue Watching, New Releases, Featured Banner, Browse) usam dados combinados
-- Sistema funcionando: busca metadados do TMDB e valida URLs do GitHub
-- Backend importa URLs do `fanDubConfig.ts` dinamicamente
-- **Botão de estúdio**: MediaModal detecta fandub via genre ID -1 e exibe botão Instagram do estúdio
-- **Player exclusivo**: Fandub usa apenas Player 2 (Drive), PlayerFlix não é exibido
-- **Progresso**: Sistema de progresso funciona para ambos os players (PlayerFlix e Drive)
-
-**TMDB API Key:**
-- Configurada chave de API do TMDB como secret do Replit
-- Disponível como variável de ambiente `TMDB_API_KEY`
+TavernaStream is a full-stack web application designed for streaming movies and series. It integrates data from The Movie Database (TMDB) with video URLs stored in Firebase Realtime Database. The platform offers a rich media catalog, a versatile video player, progress tracking, "New Releases," user-specific watchlists, and real-time search, all within a responsive UI. Key ambitions include delivering a seamless and engaging streaming experience with unique features like an automatic fan dubbing system, persistent release countdowns, and a focus on PWA capabilities for installability and offline access.
 
 ## User Preferences
 
@@ -169,7 +10,7 @@ I prefer detailed explanations and an iterative development approach. Please ask
 
 ## System Architecture
 
-The application employs a clear separation between frontend and backend components.
+The application employs a clear separation between frontend and backend components, focusing on performance, responsiveness, and a rich user experience.
 
 ### Frontend
 - **Framework**: React 18 with TypeScript, built using Vite.
@@ -177,37 +18,34 @@ The application employs a clear separation between frontend and backend componen
 - **Routing**: Wouter for lightweight client-side routing.
 - **State Management & Data Fetching**: TanStack Query (React Query) for data caching and server state management.
 - **UI/UX Decisions**:
-    - Mobile-first design with responsive layouts.
+    - Mobile-first, responsive design optimized for various screen sizes, including custom Tailwind breakpoints for Smart TV, 2k, and 4k displays.
     - 16:9 aspect ratio for the video player.
     - Dynamic hero banners, categorized media rows, and visual progress indicators.
-    - Featured Banner redesign inspired by Netflix, with click-to-play trailer interaction and Framer Motion for smooth animations.
-    - Optimized for various screen sizes, including custom Tailwind breakpoints for Smart TV, 2k, and 4k displays with dynamic font scaling.
-    - Persistent release countdown with local storage for state management.
-    - Dedicated "Fã Dublagem" category on the home page.
+    - Featured Banner redesign inspired by Netflix, with Framer Motion for smooth animations.
+    - Persistent release countdown with local storage.
+    - Dedicated "Fã Dublagem" category on the home page with studio name display and "FANDUB" badge.
     - Improved "Continue Watching" section with 16:9 thumbnails and quick removal options.
+    - Official logos displayed in modals, prioritizing Portuguese.
+    - PWA (Progressive Web App) enabled for installability and offline functionality with a network-first caching strategy.
+    - Integrated Fluid Player for direct streaming with robust configuration (speed controls, volume persistence, quality, theatre mode) and progress tracking.
 
 ### Backend
 - **Framework**: Express.js with TypeScript, running on Node.js using `tsx`.
 - **External API Integration**: Primarily TMDB API for media metadata.
 - **Data Storage**:
     - PostgreSQL (Neon) for user-specific data ("My List").
-    - Firebase Realtime Database for video URLs with real-time updates and an intelligent caching system (30-second TTL). Uses separate databases for movies and series.
-- **API Endpoints**:
-    - `GET /api/media/fandub`: Fetches all fan dub metadata.
-    - `GET /api/fan-dub/movie/:id/url`: Fetches movie Drive URL from GitHub.
-    - `GET /api/fan-dub/tv/:id/url`: Fetches series Drive URL from GitHub.
-    - `GET /api/media/check/:id/:type`: Verifies content existence in GitHub catalogs.
-    - `GET /api/media/videos/:id/:type`: Fetches trailers and videos from TMDB.
+    - Firebase Realtime Database for video URLs with real-time updates and an intelligent caching system (30-second TTL), using separate databases for movies and series.
+- **API Endpoints**: Key endpoints support fetching fan dub metadata, episode structures from GitHub, content existence verification, and TMDB video details. Includes specific endpoints for Google Drive URL conversion.
 
 ### Core Features
 - **Media Catalog**: Displays movies and series with TMDB metadata, categorized by genre.
-- **Video Player**: Supports PlayerFlix (with ads) and direct Google Drive URLs (ad-free), with responsive design and episode navigation.
-- **Continue Watching**: Tracks viewing progress (completion threshold at 80%), stored in localStorage, with quick removal functionality.
+- **Video Player**: Supports Fluid Player for direct Google Drive URLs and PlayerFlix (with ads), with responsive design and episode navigation. Includes advanced player functionalities like progress tracking and resume playback.
+- **Continue Watching**: Tracks viewing progress with a completion threshold at 80%, stored in localStorage, with quick removal functionality.
 - **New Releases**: Highlights recently added content from Firebase.
 - **My List**: Allows users to add/remove media, persisted in PostgreSQL.
 - **Search**: Real-time search using TMDB API, filtered by content availability in Firebase.
-- **Automatic Fan Dubbing System**: Integrates with GitHub to fetch Drive URLs for fan-dubbed content, supporting seamless playback.
-- **Release Countdown**: Displays upcoming content, blocks access until release time, and provides "Available Now!" messaging.
+- **Automatic Fan Dubbing System**: Integrates with GitHub to fetch Drive URLs for fan-dubbed content, supporting seamless playback exclusively via the Drive player. Fan-dub content is identified by a genre ID of -1 and integrated into navigation and categories without duplication.
+- **Release Countdown**: Displays upcoming content, blocks access until release time, and provides "Available Now!" messaging with automatic content verification and in-app notifications (via toast).
 - **Featured Content Banner**: Premium-quality banner below "Novidades" for manually configured featured items.
 
 ### System Design Choices
@@ -215,14 +53,14 @@ The application employs a clear separation between frontend and backend componen
 - **Shared State Architecture**: `useWatchProgress` hook ensures consistent progress state across components.
 - **Dynamic Content Ordering**: Catalog and hero banner prioritize recently added items.
 - **Rotating Hero Banner**: Displays up to five recent items with navigation and smooth transitions.
+- **Intelligent Fallback**: For video playback, Fluid Player is prioritized, with an iframe fallback for Google Drive previews if the direct stream fails.
 
 ## External Dependencies
 
-- **TMDB API**: Fetches movie and series metadata, including titles, synopses, posters, and external IDs.
+- **TMDB API**: Fetches movie and series metadata (titles, synopses, posters, external IDs).
 - **Firebase Realtime Database**: Stores and synchronizes video URLs for movies and series.
 - **PlayerFlix API**: Provides movie and series playback options.
-    - Movie Playback: `https://playerflixapi.com/filme/{imdb_id}`
-    - Series Playback: `https://playerflixapi.com/serie/{tmdb_id}/{season}/{episode}`
 - **PostgreSQL (Neon)**: Persists user-specific data for the "My List" feature.
-- **Google Drive**: Supports direct URLs for ad-free video playback.
-- **GitHub**: Used by the automatic fan dubbing system to fetch Drive URLs.
+- **Google Drive**: Supports direct URLs for ad-free video playback and content streaming.
+- **GitHub**: Used by the automatic fan dubbing system to fetch Drive URLs for fan-dubbed content.
+- **Fluid Player**: Open-source video player library for enhanced streaming capabilities.
