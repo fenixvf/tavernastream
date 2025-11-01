@@ -47,7 +47,6 @@ export default function Home() {
   } | null>(null);
 
   const { getContinueWatching, watchProgress, getProgress, removeFromContinueWatching, clearAllProgress } = useWatchProgress();
-  const { updateSeenContent, getNewContent } = useNewContent();
 
   // Fetch all media (movies + series) - atualiza a cada 30 segundos
   const { data: allMedia, isLoading: isLoadingMedia } = useQuery<MediaItem[]>({
@@ -134,38 +133,19 @@ export default function Home() {
     })
     .filter(Boolean) as MediaItem[];
 
-  // Get new releases - detecta automaticamente novos conteúdos adicionados
+  // Get new releases - usa os primeiros items do catálogo que já vêm ordenados por data
   const newReleases = (() => {
     if (!allMediaCombined) return [];
     
-    const newContent = getNewContent(allMediaCombined);
-    
-    if (newContent.length > 0) {
-      const newMovies = newContent.filter(m => m.mediaType === 'movie' && !m.genres?.includes(-1));
-      const newSeries = newContent.filter(m => m.mediaType === 'tv' && !m.genres?.includes(-1));
-      const newFandubs = newContent.filter(m => m.genres?.includes(-1));
-      
-      const balanced: MediaItem[] = [];
-      const maxLength = Math.max(newMovies.length, newSeries.length, newFandubs.length);
-      
-      for (let i = 0; i < maxLength; i++) {
-        if (newMovies[i]) balanced.push(newMovies[i]);
-        if (newSeries[i]) balanced.push(newSeries[i]);
-        if (newFandubs[i]) balanced.push(newFandubs[i]);
-      }
-      
-      return balanced.slice(0, 20);
-    }
-    
     const recentMovies = allMediaCombined
       .filter(m => m.mediaType === 'movie' && !m.genres?.includes(-1))
-      .slice(0, 4);
+      .slice(0, 6);
     const recentSeries = allMediaCombined
       .filter(m => m.mediaType === 'tv' && !m.genres?.includes(-1))
-      .slice(0, 4);
+      .slice(0, 6);
     const recentFandubs = allMediaCombined
       .filter(m => m.genres?.includes(-1))
-      .slice(0, 3);
+      .slice(0, 4);
     
     const balanced: MediaItem[] = [];
     const maxLength = Math.max(recentMovies.length, recentSeries.length, recentFandubs.length);
@@ -176,7 +156,7 @@ export default function Home() {
       if (recentFandubs[i]) balanced.push(recentFandubs[i]);
     }
     
-    return balanced;
+    return balanced.slice(0, 20);
   })();
 
   // Categorize media by genre
@@ -507,11 +487,6 @@ export default function Home() {
     }
   };
 
-  useEffect(() => {
-    if (allMediaCombined && allMediaCombined.length > 0) {
-      updateSeenContent(allMediaCombined);
-    }
-  }, [allMediaCombined]);
 
   useEffect(() => {
     if (mobileTab === 'search') {

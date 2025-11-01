@@ -4,17 +4,20 @@ import type { MediaItem } from '@shared/schema';
 const STORAGE_KEY = 'tavernastream_seen_content';
 const NEW_CONTENT_DAYS = 7;
 
+interface ContentItem {
+  tmdbId: number;
+  firstSeenAt: string;
+}
+
 interface SeenContent {
-  movieIds: number[];
-  seriesIds: number[];
-  lastUpdate: string;
+  movies: ContentItem[];
+  series: ContentItem[];
 }
 
 export function useNewContent() {
   const [seenContent, setSeenContent] = useState<SeenContent>({
-    movieIds: [],
-    seriesIds: [],
-    lastUpdate: new Date().toISOString(),
+    movies: [],
+    series: [],
   });
 
   useEffect(() => {
@@ -28,88 +31,75 @@ export function useNewContent() {
     }
   }, []);
 
-  const updateSeenContent = useCallback((media: MediaItem[]) => {
-    setSeenContent((prev) => {
-      const movieIds = new Set(prev.movieIds);
-      const seriesIds = new Set(prev.seriesIds);
-      
-      media.forEach((item) => {
-        if (item.mediaType === 'movie') {
-          movieIds.add(item.tmdbId);
-        } else {
-          seriesIds.add(item.tmdbId);
-        }
-      });
-
-      const updated: SeenContent = {
-        movieIds: Array.from(movieIds),
-        seriesIds: Array.from(seriesIds),
-        lastUpdate: new Date().toISOString(),
-      };
-
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-      return updated;
-    });
-  }, []);
-
   const getNewContent = useCallback((media: MediaItem[]): MediaItem[] => {
     if (!media || media.length === 0) return [];
 
+    const now = Date.now();
+    const sevenDaysAgo = now - NEW_CONTENT_DAYS * 24 * 60 * 60 * 1000;
     const newItems: MediaItem[] = [];
-    const sevenDaysAgo = Date.now() - NEW_CONTENT_DAYS * 24 * 60 * 60 * 1000;
-    const lastUpdateTime = new Date(seenContent.lastUpdate).getTime();
-    
-    const isRecentlyAdded = lastUpdateTime > sevenDaysAgo;
 
     media.forEach((item) => {
-      const isNew = item.mediaType === 'movie'
-        ? !seenContent.movieIds.includes(item.tmdbId)
-        : !seenContent.seriesIds.includes(item.tmdbId);
+      const contentList = item.mediaType === 'movie' ? seenContent.movies : seenContent.series;
+      const existingItem = contentList.find(c => c.tmdbId === item.tmdbId);
 
-      if (isNew && isRecentlyAdded) {
+      if (!existingItem) {
         newItems.push(item);
+      } else {
+        const firstSeenTime = new Date(existingItem.firstSeenAt).getTime();
+        if (firstSeenTime > sevenDaysAgo) {
+          newItems.push(item);
+        }
       }
     });
 
     return newItems;
   }, [seenContent]);
 
-  const markAsViewed = useCallback((media: MediaItem) => {
+  const recordNewContent = useCallback((media: MediaItem[]) => {
+    if (!media || media.length === 0) return;
+
     setSeenContent((prev) => {
       const updated = { ...prev };
-      
-      if (media.mediaType === 'movie') {
-        if (!updated.movieIds.includes(media.tmdbId)) {
-          updated.movieIds.push(media.tmdbId);
-        }
-      } else {
-        if (!updated.seriesIds.includes(media.tmdbId)) {
-          updated.seriesIds.push(media.tmdbId);
-        }
-      }
+      let hasChanges = false;
+      const now = new Date().toISOString();
 
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      media.forEach((item) => {
+        const contentList = item.mediaType === 'movie' ? updated.movies : updated.series;
+        const exists = contentList.find(c => c.tmdbId === item.tmdbId);
+
+        if (!exists) {
+          if (item.mediaType === 'movie') {
+            updated.movies = [...updated.movies, { tmdbId: item.tmdbId, firstSeenAt: now }];
+          } else {
+            updated.series = [...updated.series, { tmdbId: item.tmdbId, firstSeenAt: now }];
+          }
+          hasChanges = true;
+        }
+      });
+
+      if (hasChanges) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      }
       return updated;
     });
   }, []);
 
   const isNewContent = useCallback((item: MediaItem): boolean => {
     const sevenDaysAgo = Date.now() - NEW_CONTENT_DAYS * 24 * 60 * 60 * 1000;
-    const lastUpdateTime = new Date(seenContent.lastUpdate).getTime();
-    
-    if (lastUpdateTime <= sevenDaysAgo) {
-      return false;
+    const contentList = item.mediaType === 'movie' ? seenContent.movies : seenContent.series;
+    const existingItem = contentList.find(c => c.tmdbId === item.tmdbId);
+
+    if (!existingItem) {
+      return true;
     }
 
-    return item.mediaType === 'movie'
-      ? !seenContent.movieIds.includes(item.tmdbId)
-      : !seenContent.seriesIds.includes(item.tmdbId);
+    const firstSeenTime = new Date(existingItem.firstSeenAt).getTime();
+    return firstSeenTime > sevenDaysAgo;
   }, [seenContent]);
 
   return {
-    updateSeenContent,
     getNewContent,
-    markAsViewed,
+    recordNewContent,
     isNewContent,
     seenContent,
   };

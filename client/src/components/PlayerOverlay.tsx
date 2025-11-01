@@ -105,21 +105,31 @@ export function PlayerOverlay({
       
       let currentTime: number;
       let totalDuration: number;
+      let isCompleted: boolean;
       
-      if (selectedPlayer === 'drive' && videoDuration > 0) {
-        currentTime = Math.floor(currentVideoTime);
-        totalDuration = Math.floor(videoDuration);
+      if (selectedPlayer === 'drive') {
+        if (videoDuration > 0) {
+          currentTime = Math.floor(currentVideoTime);
+          totalDuration = Math.floor(videoDuration);
+        } else {
+          currentTime = Math.floor(watchDuration / 1000);
+          totalDuration = 0;
+        }
+        isCompleted = false;
       } else {
         const watchedSeconds = watchDuration / 1000;
         currentTime = forceCurrentTime !== undefined ? forceCurrentTime : Math.floor(watchedSeconds);
         totalDuration = mediaType === 'movie' ? 7200 : 2400;
+        const progressPercent = totalDuration > 0 
+          ? Math.min(95, (currentTime / totalDuration) * 100)
+          : 0;
+        isCompleted = progressPercent >= 80;
       }
       
       if (currentTime >= 30 || forceCurrentTime !== undefined) {
         const progressPercent = totalDuration > 0 
           ? Math.min(95, (currentTime / totalDuration) * 100)
           : 0;
-        const isCompleted = progressPercent >= 80;
         
         saveProgress({
           tmdbId,
