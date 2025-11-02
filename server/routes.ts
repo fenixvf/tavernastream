@@ -669,7 +669,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const apiKey = process.env.GOOGLE_API_KEY;
       
       if (!apiKey) {
-        return res.status(500).json({ error: 'Google API key not configured' });
+        console.error('Google API key not configured, using fallback');
+        return res.status(403).json({ 
+          error: 'Google API key not configured',
+          useFallback: true 
+        });
       }
 
       const metadataResponse = await fetch(
@@ -677,8 +681,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
 
       if (!metadataResponse.ok) {
-        console.error(`Google Drive API error: ${metadataResponse.status}`);
-        return res.status(metadataResponse.status).json({ error: 'Failed to fetch file metadata' });
+        const errorText = await metadataResponse.text().catch(() => 'Unknown error');
+        console.error(`Google Drive API metadata error ${metadataResponse.status}:`, errorText);
+        
+        return res.status(metadataResponse.status).json({ 
+          error: 'Failed to fetch file metadata',
+          details: errorText,
+          useFallback: true
+        });
       }
 
       const metadata = await metadataResponse.json();
@@ -702,7 +712,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
 
         if (!driveResponse.ok && driveResponse.status !== 206) {
-          return res.status(driveResponse.status).json({ error: 'Failed to fetch file content' });
+          const errorText = await driveResponse.text().catch(() => 'Unknown error');
+          console.error(`Google Drive API stream error ${driveResponse.status}:`, errorText);
+          
+          return res.status(driveResponse.status).json({ 
+            error: 'Failed to fetch file content',
+            details: errorText,
+            useFallback: true
+          });
         }
 
         res.writeHead(206, {
@@ -728,7 +745,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
 
         if (!driveResponse.ok) {
-          return res.status(driveResponse.status).json({ error: 'Failed to fetch file content' });
+          const errorText = await driveResponse.text().catch(() => 'Unknown error');
+          console.error(`Google Drive API stream error ${driveResponse.status}:`, errorText);
+          
+          return res.status(driveResponse.status).json({ 
+            error: 'Failed to fetch file content',
+            details: errorText,
+            useFallback: true
+          });
         }
 
         res.writeHead(200, {
@@ -751,7 +775,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error streaming from Drive:', error);
       if (!res.headersSent) {
-        res.status(500).json({ error: 'Failed to stream file' });
+        res.status(500).json({ 
+          error: 'Failed to stream file',
+          useFallback: true
+        });
       }
     }
   });

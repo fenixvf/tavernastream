@@ -101,8 +101,22 @@ export function FluidPlayer({ driveUrl, title, onTimeUpdate, resumeTime = 0 }: F
       }
     };
 
-    const handleError = () => {
-      if (mounted) {
+    const handleError = async () => {
+      if (!mounted) return;
+      
+      console.log('Video error detected, attempting fallback to iframe');
+      
+      const fileIdMatch = streamData.streamUrl.match(/\/stream\/([^/]+)/);
+      const fileId = fileIdMatch?.[1] || streamData.fileId;
+      
+      if (fileId) {
+        const fallbackUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+        setStreamData({
+          streamUrl: fallbackUrl,
+          fallback: true,
+          fileId
+        });
+      } else {
         setIsLoading(false);
         setError(true);
       }
