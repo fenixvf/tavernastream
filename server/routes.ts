@@ -624,38 +624,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Could not extract file ID from Drive URL' });
       }
 
-      const apiKey = process.env.GOOGLE_API_KEY;
-      
-      if (!apiKey) {
-        console.error('GOOGLE_API_KEY not configured');
-        return res.status(500).json({ error: 'Google API key not configured' });
-      }
-
-      const response = await fetch(
-        `https://www.googleapis.com/drive/v3/files/${fileId}?fields=id,name,mimeType,size,webContentLink&key=${apiKey}`
-      );
-
-      if (!response.ok) {
-        console.error(`Google Drive API error: ${response.status} ${response.statusText}`);
-        const embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
-        return res.json({ 
-          streamUrl: embedUrl,
-          fallback: true,
-          fileId
-        });
-      }
-
-      const fileData = await response.json();
-      
-      const streamUrl = `/api/drive/stream/${fileId}`;
+      const embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
       
       res.json({
-        streamUrl,
+        streamUrl: embedUrl,
         fileId,
-        fileName: fileData.name,
-        mimeType: fileData.mimeType,
-        size: fileData.size,
-        fallback: false
+        fallback: true
       });
     } catch (error) {
       console.error('Error getting Drive stream URL:', error);
