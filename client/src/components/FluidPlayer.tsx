@@ -88,8 +88,29 @@ export function FluidPlayer({ driveUrl, title, onTimeUpdate, resumeTime = 0 }: F
 
     const videoId = videoIdRef.current;
     let mounted = true;
+    let handlersAdded = false;
+
+    const handleLoadedMetadata = () => {
+      if (mounted) {
+        setIsLoading(false);
+        setError(false);
+        
+        if (resumeTime && resumeTime > 0 && videoElement.duration) {
+          videoElement.currentTime = resumeTime;
+        }
+      }
+    };
+
+    const handleError = () => {
+      if (mounted) {
+        setIsLoading(false);
+        setError(true);
+      }
+    };
 
     const initPlayer = () => {
+      if (!mounted) return;
+      
       try {
         if (playerInstanceRef.current) {
           try {
@@ -99,6 +120,8 @@ export function FluidPlayer({ driveUrl, title, onTimeUpdate, resumeTime = 0 }: F
           }
           playerInstanceRef.current = null;
         }
+
+        if (!mounted) return;
 
         playerInstanceRef.current = fluidPlayer(videoId, {
           layoutControls: {
@@ -118,27 +141,20 @@ export function FluidPlayer({ driveUrl, title, onTimeUpdate, resumeTime = 0 }: F
           }
         });
 
-        const handleLoadedMetadata = () => {
-          if (mounted) {
-            setIsLoading(false);
-            setError(false);
-            
-            if (resumeTime && resumeTime > 0 && videoElement.duration) {
-              videoElement.currentTime = resumeTime;
-            }
+        if (!mounted) {
+          if (playerInstanceRef.current) {
+            try {
+              playerInstanceRef.current.destroy();
+            } catch (e) {}
+            playerInstanceRef.current = null;
           }
-        };
-
-        const handleError = () => {
-          if (mounted) {
-            setIsLoading(false);
-            setError(true);
-          }
-        };
+          return;
+        }
 
         videoElement.addEventListener('loadedmetadata', handleLoadedMetadata);
         videoElement.addEventListener('error', handleError);
         videoElement.addEventListener('timeupdate', handleTimeUpdate);
+        handlersAdded = true;
 
         if (progressIntervalRef.current) {
           clearInterval(progressIntervalRef.current);
@@ -164,17 +180,11 @@ export function FluidPlayer({ driveUrl, title, onTimeUpdate, resumeTime = 0 }: F
       mounted = false;
       clearTimeout(timeout);
 
-      if (videoElement) {
-        videoElement.removeEventListener('loadedmetadata', () => {});
-        videoElement.removeEventListener('error', () => {});
-        videoElement.removeEventListener('timeupdate', handleTimeUpdate);
-      }
-      
       if (progressIntervalRef.current) {
         clearInterval(progressIntervalRef.current);
         progressIntervalRef.current = null;
       }
-      
+
       if (playerInstanceRef.current) {
         try {
           playerInstanceRef.current.destroy();
@@ -182,6 +192,14 @@ export function FluidPlayer({ driveUrl, title, onTimeUpdate, resumeTime = 0 }: F
           console.warn('Error destroying player on cleanup:', e);
         }
         playerInstanceRef.current = null;
+      }
+
+      if (handlersAdded && videoElement) {
+        try {
+          videoElement.removeEventListener('loadedmetadata', handleLoadedMetadata);
+          videoElement.removeEventListener('error', handleError);
+          videoElement.removeEventListener('timeupdate', handleTimeUpdate);
+        } catch (e) {}
       }
     };
   }, [streamData, resumeTime, handleTimeUpdate]);
