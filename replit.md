@@ -58,9 +58,15 @@ The application employs a clear separation between frontend and backend componen
 ## External Dependencies
 
 - **TMDB API**: Fetches movie and series metadata (titles, synopses, posters, external IDs).
+  - **API Key**: Configured via `TMDB_API_KEY` environment variable
+  - **Status**: ✓ Configured
 - **Firebase Realtime Database**: Stores and synchronizes video URLs for movies and series.
 - **PlayerFlix API**: Provides movie and series playback options.
 - **PostgreSQL (Neon)**: Persists user-specific data for the "My List" feature.
-- **Google Drive**: Supports direct URLs for ad-free video playback and content streaming.
+- **Google Drive API**: Enables direct streaming of videos from Google Drive via Fluid Player.
+  - **API Key**: Configured via `GOOGLE_API_KEY` environment variable
+  - **Status**: ✓ Configured
+  - **Endpoint**: `/api/drive/get-stream-url` - Converts Google Drive URLs to streamable URLs
+  - **Integration Note**: User declined native Replit Google Drive connector; using manual API key configuration instead
 - **GitHub**: Used by the automatic fan dubbing system to fetch Drive URLs for fan-dubbed content.
-- **Fluid Player**: Open-source video player library for enhanced streaming capabilities.
+- **Fluid Player**: Open-source video player library for enhanced streaming capabilities with Google Drive integration.

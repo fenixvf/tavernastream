@@ -647,7 +647,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const fileData = await response.json();
       
-      const streamUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${apiKey}`;
+      const streamUrl = `/api/drive/stream/${fileId}`;
       
       res.json({
         streamUrl,
@@ -660,6 +660,99 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error getting Drive stream URL:', error);
       res.status(500).json({ error: 'Failed to get stream URL' });
+    }
+  });
+
+  app.get("/api/drive/stream/:fileId", async (req, res) => {
+    try {
+      const { fileId } = req.params;
+      const apiKey = process.env.GOOGLE_API_KEY;
+      
+      if (!apiKey) {
+        return res.status(500).json({ error: 'Google API key not configured' });
+      }
+
+      const metadataResponse = await fetch(
+        `https://www.googleapis.com/drive/v3/files/${fileId}?fields=size,mimeType,name&key=${apiKey}`
+      );
+
+      if (!metadataResponse.ok) {
+        console.error(`Google Drive API error: ${metadataResponse.status}`);
+        return res.status(metadataResponse.status).json({ error: 'Failed to fetch file metadata' });
+      }
+
+      const metadata = await metadataResponse.json();
+      const fileSize = parseInt(metadata.size || '0');
+
+      const range = req.headers.range;
+      
+      if (range) {
+        const parts = range.replace(/bytes=/, "").split("-");
+        const start = parseInt(parts[0], 10);
+        const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+        const chunkSize = (end - start) + 1;
+
+        const driveResponse = await fetch(
+          `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${apiKey}`,
+          {
+            headers: {
+              'Range': `bytes=${start}-${end}`
+            }
+          }
+        );
+
+        if (!driveResponse.ok && driveResponse.status !== 206) {
+          return res.status(driveResponse.status).json({ error: 'Failed to fetch file content' });
+        }
+
+        res.writeHead(206, {
+          'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+          'Accept-Ranges': 'bytes',
+          'Content-Length': chunkSize,
+          'Content-Type': metadata.mimeType || 'video/mp4',
+          'Cache-Control': 'no-cache'
+        });
+
+        const reader = driveResponse.body?.getReader();
+        if (reader) {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            res.write(value);
+          }
+        }
+        res.end();
+      } else {
+        const driveResponse = await fetch(
+          `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${apiKey}`
+        );
+
+        if (!driveResponse.ok) {
+          return res.status(driveResponse.status).json({ error: 'Failed to fetch file content' });
+        }
+
+        res.writeHead(200, {
+          'Content-Length': fileSize,
+          'Content-Type': metadata.mimeType || 'video/mp4',
+          'Accept-Ranges': 'bytes',
+          'Cache-Control': 'no-cache'
+        });
+
+        const reader = driveResponse.body?.getReader();
+        if (reader) {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            res.write(value);
+          }
+        }
+        res.end();
+      }
+    } catch (error) {
+      console.error('Error streaming from Drive:', error);
+      if (!res.headersSent) {
+        res.status(500).json({ error: 'Failed to stream file' });
+      }
     }
   });
 
