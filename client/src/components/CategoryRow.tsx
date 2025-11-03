@@ -106,6 +106,7 @@ export function CategoryRow({ title, media, onMediaClick, onAddToList, myListIds
                     media={item}
                     onClick={() => onMediaClick(item)}
                     onRemove={() => onRemove(item)}
+                    onShowDetails={() => onMediaClick(item)}
                     watchProgress={progress}
                   />
                 );

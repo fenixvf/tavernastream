@@ -130,6 +130,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: 'Failed to fetch hero media' });
     }
   });
+
+  // Get recent media for notifications
+  app.get("/api/media/recent", async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 10;
+      const [movieIds, seriesIds] = await Promise.all([
+        getAllMovieIds(),
+        getAllSeriesIds()
+      ]);
+      
+      const recentMedia: MediaItem[] = [];
+      const recentMovies = movieIds.slice(0, Math.ceil(limit / 2));
+      const recentSeries = seriesIds.slice(0, Math.ceil(limit / 2));
+      
+      for (const tmdbId of recentMovies) {
+        try {
+          const details = await getMovieDetails(tmdbId);
+          recentMedia.push({
+            tmdbId,
+            title: details.title || '',
+            posterPath: details.poster_path,
+            backdropPath: details.backdrop_path,
+            overview: details.overview || '',
+            rating: details.vote_average || 0,
+            releaseDate: details.release_date || '',
+            mediaType: 'movie',
+            genres: details.genres?.map((g: any) => g.id) || [],
+            hasVideo: true,
+          });
+        } catch (error) {
+          console.error(`Error fetching recent movie ${tmdbId}:`, error);
+        }
+      }
+      
+      for (const tmdbId of recentSeries) {
+        try {
+          const details = await getTVDetails(tmdbId);
+          recentMedia.push({
+            tmdbId,
+            title: details.name || '',
+            posterPath: details.poster_path,
+            backdropPath: details.backdrop_path,
+            overview: details.overview || '',
+            rating: details.vote_average || 0,
+            releaseDate: details.first_air_date || '',
+            mediaType: 'tv',
+            genres: details.genres?.map((g: any) => g.id) || [],
+            hasVideo: true,
+          });
+        } catch (error) {
+          console.error(`Error fetching recent series ${tmdbId}:`, error);
+        }
+      }
+      
+      res.json(recentMedia.slice(0, limit));
+    } catch (error) {
+      console.error('Error fetching recent media:', error);
+      res.status(500).json({ error: 'Failed to fetch recent media' });
+    }
+  });
   
   // Check if media exists in catalog
   app.get("/api/media/check/:id/:type", async (req, res) => {

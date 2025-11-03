@@ -1,12 +1,19 @@
-import { X, Play } from 'lucide-react';
+import { Play, MoreVertical, Info, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import type { MediaItem, WatchProgress } from '@shared/schema';
 
 interface ContinueWatchingCardProps {
   media: MediaItem;
   onClick: () => void;
   onRemove: () => void;
+  onShowDetails: () => void;
   watchProgress: WatchProgress;
 }
 
@@ -14,6 +21,7 @@ export function ContinueWatchingCard({
   media, 
   onClick, 
   onRemove,
+  onShowDetails,
   watchProgress,
 }: ContinueWatchingCardProps) {
   const isMovie = media.mediaType === 'movie';
@@ -83,19 +91,46 @@ export function ContinueWatchingCard({
           </div>
         </div>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute top-2 right-2 z-50 h-9 w-9 bg-black/80 backdrop-blur-sm hover:bg-black/95 hover:scale-110 rounded-full opacity-100 transition-all duration-200 shadow-lg"
-          onClick={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            onRemove();
-          }}
-          data-testid={`button-remove-${media.tmdbId}`}
-        >
-          <X className="w-5 h-5 text-white" />
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-2 right-2 z-50 h-9 w-9 bg-black/80 backdrop-blur-sm hover:bg-black/95 hover:scale-110 rounded-full opacity-100 transition-all duration-200 shadow-lg"
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+              }}
+              data-testid={`button-menu-${media.tmdbId}`}
+            >
+              <MoreVertical className="w-5 h-5 text-white" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48 bg-card/95 backdrop-blur-md border-card-border">
+            <DropdownMenuItem
+              className="cursor-pointer hover:bg-primary/10 focus:bg-primary/10"
+              onClick={(e) => {
+                e.stopPropagation();
+                onShowDetails();
+              }}
+              data-testid={`menu-details-${media.tmdbId}`}
+            >
+              <Info className="w-4 h-4 mr-2" />
+              <span>Detalhes</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="cursor-pointer text-red-500 hover:bg-red-500/10 focus:bg-red-500/10 focus:text-red-500"
+              onClick={(e) => {
+                e.stopPropagation();
+                onRemove();
+              }}
+              data-testid={`menu-remove-${media.tmdbId}`}
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              <span>Remover da Fileira</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );

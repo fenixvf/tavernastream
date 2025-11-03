@@ -6,6 +6,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import type { PlayerType } from '@shared/schema';
 import { useWatchProgress } from '@/hooks/use-watch-progress';
 import { FluidPlayer } from '@/components/FluidPlayer';
+import { AdPopup } from '@/components/AdPopup';
 
 interface PlayerOverlayProps {
   isOpen: boolean;
@@ -47,7 +48,7 @@ export function PlayerOverlay({
   isFanDub = false,
 }: PlayerOverlayProps) {
   const [selectedPlayer, setSelectedPlayer] = useState<PlayerType | null>(null);
-  const [showAdWarning, setShowAdWarning] = useState(false);
+  const [showAdPopup, setShowAdPopup] = useState(false);
   const [showOverloadWarning, setShowOverloadWarning] = useState(false);
   const [watchStartTime, setWatchStartTime] = useState<number | null>(null);
   const [currentVideoTime, setCurrentVideoTime] = useState<number>(0);
@@ -152,11 +153,14 @@ export function PlayerOverlay({
 
   const handlePlayerSelect = (playerType: PlayerType) => {
     if (playerType === 'playerflix') {
-      setShowAdWarning(true);
-      setTimeout(() => setShowAdWarning(false), 5000);
+      setShowAdPopup(true);
     }
     setWatchStartTime(Date.now());
     setSelectedPlayer(playerType);
+  };
+
+  const handleAdPopupClose = () => {
+    setShowAdPopup(false);
   };
 
   // Salvar progresso periodicamente (a cada 30 segundos)
@@ -257,14 +261,6 @@ export function PlayerOverlay({
         
         {/* Alerts - Melhorado para mobile */}
         <div className="fixed top-20 sm:top-24 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-md px-2">
-          {showAdWarning && (
-            <Alert className="bg-yellow-500/95 text-black border-2 border-yellow-600 shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-top-4 duration-300">
-              <AlertTriangle className="h-5 w-5" />
-              <AlertDescription className="font-bold text-base sm:text-lg">
-                Este player contém anúncios
-              </AlertDescription>
-            </Alert>
-          )}
           {showOverloadWarning && (
             <Alert className="bg-red-600/95 text-white border-2 border-red-700 shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-top-4 duration-300">
               <AlertTriangle className="h-5 w-5" />
@@ -274,6 +270,9 @@ export function PlayerOverlay({
             </Alert>
           )}
         </div>
+
+        {/* Ad Popup for PlayerFlix */}
+        <AdPopup isOpen={showAdPopup} onClose={handleAdPopupClose} />
 
         {/* Top Controls */}
         <div className="absolute top-4 left-4 right-4 z-50 flex items-center justify-between gap-2">

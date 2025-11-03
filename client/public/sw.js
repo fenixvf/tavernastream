@@ -1,10 +1,10 @@
-const CACHE_NAME = 'taverna-stream-v1';
+const CACHE_NAME = 'taverna-stream-v2';
 
 self.addEventListener('install', (event) => {
   console.log('[Service Worker] Installing...');
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(['/index.html', '/manifest.json']).catch(() => {
+      return cache.addAll(['/index.html', '/manifest.json', '/icon-192.png', '/icon-512.png']).catch(() => {
         console.log('[Service Worker] Precache failed, will cache on first visit');
       });
     })
@@ -67,6 +67,48 @@ self.addEventListener('fetch', (event) => {
         
         return new Response('Offline', { status: 503 });
       });
+    })
+  );
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SHOW_NOTIFICATION') {
+    const { notification } = event.data;
+    
+    self.registration.showNotification(notification.title, {
+      body: notification.body,
+      icon: notification.icon,
+      badge: notification.badge,
+      tag: notification.tag,
+      data: notification.data,
+      requireInteraction: false,
+      vibrate: [200, 100, 200],
+      actions: [
+        {
+          action: 'view',
+          title: 'Assistir Agora'
+        }
+      ]
+    });
+  }
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  
+  const urlToOpen = event.notification.data?.url || '/';
+  
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url === urlToOpen && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      
+      if (clients.openWindow) {
+        return clients.openWindow(urlToOpen);
+      }
     })
   );
 });
