@@ -147,6 +147,7 @@ export function usePushNotifications() {
   return {
     permission,
     isSupported: isSupported && isMobile,
+    isMobile,
     requestPermission,
     checkForNewContent
   };

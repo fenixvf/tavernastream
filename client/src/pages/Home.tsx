@@ -548,7 +548,7 @@ export default function Home() {
               key="continue-watching"
               title="Continuar Assistindo"
               media={continueWatching}
-              onMediaClick={handleContinueWatching}
+              onMediaClick={handleMediaClick}
               onAddToList={handleAddToList}
               myListIds={myListIds}
               allProgress={watchProgress}
