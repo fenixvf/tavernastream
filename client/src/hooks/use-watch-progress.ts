@@ -103,18 +103,17 @@ export function useWatchProgress() {
     episodeNumber?: number
   ) => {
     setWatchProgress((prev) => {
-      const updated = prev.filter((p) => {
-        if (mediaType === 'movie') {
-          return !(p.tmdbId === tmdbId && p.mediaType === 'movie');
-        } else {
-          return !(
-            p.tmdbId === tmdbId &&
-            p.mediaType === 'tv' &&
-            p.seasonNumber === seasonNumber &&
-            p.episodeNumber === episodeNumber
-          );
-        }
-      });
+      let updated: WatchProgress[];
+      
+      if (mediaType === 'movie') {
+        // Para filmes, remover apenas o filme específico
+        updated = prev.filter((p) => !(p.tmdbId === tmdbId && p.mediaType === 'movie'));
+      } else {
+        // Para séries, remover TODOS os episódios dessa série
+        // Isso evita que episódios antigos reapareçam após remover um
+        updated = prev.filter((p) => !(p.tmdbId === tmdbId && p.mediaType === 'tv'));
+      }
+      
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
       return updated;
     });
@@ -124,8 +123,39 @@ export function useWatchProgress() {
     const now = new Date().getTime();
     const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
     
-    return watchProgress
-      .filter((p) => !p.completed && new Date(p.lastWatchedAt).getTime() > thirtyDaysAgo)
+    // Filtrar itens não completados e dentro do período de 30 dias
+    const validProgress = watchProgress.filter(
+      (p) => !p.completed && new Date(p.lastWatchedAt).getTime() > thirtyDaysAgo
+    );
+    
+    // Para séries, manter apenas o último episódio assistido de cada série
+    const uniqueByMedia = validProgress.reduce((acc, current) => {
+      const existingIndex = acc.findIndex((p) => {
+        if (current.mediaType === 'movie') {
+          return p.tmdbId === current.tmdbId && p.mediaType === 'movie';
+        } else {
+          // Para séries, agrupar por tmdbId apenas (não por episódio)
+          return p.tmdbId === current.tmdbId && p.mediaType === 'tv';
+        }
+      });
+      
+      if (existingIndex !== -1) {
+        // Se já existe, manter o mais recente
+        const existing = acc[existingIndex];
+        if (new Date(current.lastWatchedAt).getTime() > new Date(existing.lastWatchedAt).getTime()) {
+          acc[existingIndex] = current;
+        }
+      } else {
+        // Se não existe, adicionar
+        acc.push(current);
+      }
+      
+      return acc;
+    }, [] as WatchProgress[]);
+    
+    // Ordenar por último assistido e limitar a 10
+    return uniqueByMedia
+      .sort((a, b) => new Date(b.lastWatchedAt).getTime() - new Date(a.lastWatchedAt).getTime())
       .slice(0, 10);
   }, [watchProgress]);
 

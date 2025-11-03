@@ -40,7 +40,11 @@ The application employs a clear separation between frontend and backend componen
 ### Core Features
 - **Media Catalog**: Displays movies and series with TMDB metadata, categorized by genre.
 - **Video Player**: Supports Fluid Player for direct Google Drive URLs and PlayerFlix (with ads), with responsive design and episode navigation. Includes advanced player functionalities like progress tracking and resume playback.
-- **Continue Watching**: Tracks viewing progress with a completion threshold at 80%, stored in localStorage, with quick removal functionality.
+- **Continue Watching**: Tracks viewing progress with a completion threshold at 80%, stored in localStorage. Features include:
+  - 3-dot dropdown menu (Details, Remove) on each card
+  - Shows only the latest episode per series (no duplication)
+  - Complete removal of all episodes when removing a series
+  - Visual enhancements: large button with white border, z-40 to stay below modals
 - **New Releases**: Highlights recently added content from Firebase.
 - **My List**: Allows users to add/remove media, persisted in PostgreSQL.
 - **Search**: Real-time search using TMDB API, filtered by content availability in Firebase.

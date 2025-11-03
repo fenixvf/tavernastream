@@ -49,6 +49,8 @@
 ### ✅ O que foi feito:
 - Atualizado `ContinueWatchingCard.tsx` com `DropdownMenu`
 - Ícone de 3 pontinhos (⋮) no canto superior direito de cada card
+- **Botão altamente visível**: z-index 100, borda branca, shadow forte
+- **Anti-duplicação**: Mostra apenas o último episódio de cada série
 - Opções:
   - **Detalhes**: Abre o modal da obra
   - **Remover da Fileira**: Remove do Continue Assistindo
@@ -61,9 +63,16 @@
 
 2. **Depois, teste o menu:**
    - A seção "Continuar Assistindo" aparecerá
-   - Cada card terá 3 pontinhos (⋮) no canto superior direito
+   - Cada card terá um **botão circular com 3 pontinhos** (⋮) no canto superior direito
+   - O botão é grande e tem borda branca para fácil identificação
    - Clique nos 3 pontinhos para ver o menu
    - Teste as opções "Detalhes" e "Remover da Fileira"
+
+### ✅ Correções Recentes:
+- **Sem duplicação**: Ao assistir ep 1, ep 2, ep 3 da mesma série, aparece apenas 1 card (o do último episódio assistido)
+- **Remoção completa**: Ao clicar em "Remover da Fileira" em uma série, todos os episódios são removidos (evita reaparecimento)
+- **Botão visível**: Aumentado tamanho, borda branca e shadow para garantir visibilidade
+- **Z-index correto**: Botão fica oculto quando modal abre (z-40), não aparece por cima do modal
 
 ---
 

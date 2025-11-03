@@ -91,46 +91,52 @@ export function ContinueWatchingCard({
           </div>
         </div>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute top-2 right-2 z-50 h-9 w-9 bg-black/80 backdrop-blur-sm hover:bg-black/95 hover:scale-110 rounded-full opacity-100 transition-all duration-200 shadow-lg"
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-              }}
-              data-testid={`button-menu-${media.tmdbId}`}
+        <div className="absolute top-2 right-2 z-40" onClick={(e) => e.stopPropagation()}>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-10 w-10 bg-black/90 backdrop-blur-md hover:bg-primary/90 hover:scale-110 rounded-full transition-all duration-200 shadow-2xl border-2 border-white/20"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+                data-testid={`button-menu-${media.tmdbId}`}
+              >
+                <MoreVertical className="w-6 h-6 text-white" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent 
+              align="end" 
+              className="w-48 bg-card/95 backdrop-blur-md border-card-border"
+              onClick={(e) => e.stopPropagation()}
             >
-              <MoreVertical className="w-5 h-5 text-white" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48 bg-card/95 backdrop-blur-md border-card-border">
-            <DropdownMenuItem
-              className="cursor-pointer hover:bg-primary/10 focus:bg-primary/10"
-              onClick={(e) => {
-                e.stopPropagation();
-                onShowDetails();
-              }}
-              data-testid={`menu-details-${media.tmdbId}`}
-            >
-              <Info className="w-4 h-4 mr-2" />
-              <span>Detalhes</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              className="cursor-pointer text-red-500 hover:bg-red-500/10 focus:bg-red-500/10 focus:text-red-500"
-              onClick={(e) => {
-                e.stopPropagation();
-                onRemove();
-              }}
-              data-testid={`menu-remove-${media.tmdbId}`}
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              <span>Remover da Fileira</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <DropdownMenuItem
+                className="cursor-pointer hover:bg-primary/10 focus:bg-primary/10"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onShowDetails();
+                }}
+                data-testid={`menu-details-${media.tmdbId}`}
+              >
+                <Info className="w-4 h-4 mr-2" />
+                <span>Detalhes</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer text-red-500 hover:bg-red-500/10 focus:bg-red-500/10 focus:text-red-500"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRemove();
+                }}
+                data-testid={`menu-remove-${media.tmdbId}`}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                <span>Remover da Fileira</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
     </div>
   );
